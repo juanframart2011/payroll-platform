@@ -41,29 +41,39 @@ class Timesheet extends MY_Controller {
 		exit(json_encode($Return));
 	}
 	
-	 // daily attendance > timesheet
-	 public function attendance()
-     {
+	// daily attendance > timesheet
+	public function attendance(){
+
 		$session = $this->session->userdata('username');
+		
 		if(empty($session)){ 
+		
 			redirect('admin/');
 		}
+
 		$data['title'] = $this->lang->line('dashboard_attendance').' | '.$this->Xin_model->site_title();
 		$data['breadcrumbs'] = $this->lang->line('dashboard_attendance');
 		$data['path_url'] = 'attendance';
 		$data['all_office_shifts'] = $this->Location_model->all_office_locations();
 		$role_resources_ids = $this->Xin_model->user_role_resource();
+		
 		if(in_array('28',$role_resources_ids)) {
+
 			if(!empty($session)){
-			$data['subview'] = $this->load->view("admin/timesheet/attendance_list", $data, TRUE);
-			$this->load->view('admin/layout/layout_main', $data); //page load
-			} else {
+
+				$data['subview'] = $this->load->view("admin/timesheet/attendance_list", $data, TRUE);
+				$this->load->view('admin/layout/layout_main', $data); //page load
+			}
+			else {
+				
 				redirect('admin/dashboard/');
-			}	
-		} else {
+			}
+		}
+		else{
+			
 			redirect('admin/dashboard');
-		}	  
-     }
+		}  
+	}
 	 
 	 // date wise date_wise_attendance > timesheet
 	 public function date_wise_attendance()
@@ -2289,22 +2299,27 @@ class Timesheet extends MY_Controller {
 
 		$data['title'] = $this->Xin_model->site_title();
 		$session = $this->session->userdata('username');
-		if(!empty($session)){ 
+		if( !empty( $session ) ){ 
+			
 			$this->load->view("admin/timesheet/office_shift", $data);
-		} else {
+		}
+		else {
 			redirect('admin/');
 		}
 		// Datatables Variables
 		$draw = intval($this->input->get("draw"));
 		$start = intval($this->input->get("start"));
-		$length = intval($this->input->get("length"));
-		
+		$length = intval($this->input->get("length"));		
 		
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$user_info = $this->Xin_model->read_user_info($session['user_id']);
+
 		if($user_info[0]->user_role_id==1){
+
 			$office_shift = $this->Timesheet_model->get_office_shifts();
-		} else {
+		}
+		else {
+			
 			if(in_array('311',$role_resources_ids)) {
 				$office_shift = $this->Timesheet_model->get_company_shifts($user_info[0]->company_id);
 			} else {
@@ -2313,59 +2328,11 @@ class Timesheet extends MY_Controller {
 		}
 		$data = array();
 
-          foreach($office_shift->result() as $r) {
+    	foreach( $office_shift->result() as $r ){
 			  
 			/* get Office Shift info*/
-			$monday_in_time = new DateTime($r->monday_in_time);
-			$monday_out_time = new DateTime($r->monday_out_time);
-			$tuesday_in_time = new DateTime($r->tuesday_in_time);
-			$tuesday_out_time = new DateTime($r->tuesday_out_time);
-			$wednesday_in_time = new DateTime($r->wednesday_in_time);
-			$wednesday_out_time = new DateTime($r->wednesday_out_time);
-			$thursday_in_time = new DateTime($r->thursday_in_time);
-			$thursday_out_time = new DateTime($r->thursday_out_time);
-			$friday_in_time = new DateTime($r->friday_in_time);
-			$friday_out_time = new DateTime($r->friday_out_time);
-			$saturday_in_time = new DateTime($r->saturday_in_time);
-			$saturday_out_time = new DateTime($r->saturday_out_time);
-			$sunday_in_time = new DateTime($r->sunday_in_time);
-			$sunday_out_time = new DateTime($r->sunday_out_time);
-			
-			if($r->monday_in_time == '') {
-				$monday = '-';
-			} else {
-				$monday = $monday_in_time->format('h:i a') .' ' .$this->lang->line('dashboard_to').' ' .$monday_out_time->format('h:i a');
-			}
-			if($r->tuesday_in_time == '') {
-				$tuesday = '-';
-			} else {
-				$tuesday = $tuesday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' '.$tuesday_out_time->format('h:i a');
-			}
-			if($r->wednesday_in_time == '') {
-				$wednesday = '-';
-			} else {
-				$wednesday = $wednesday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' ' .$wednesday_out_time->format('h:i a');
-			}
-			if($r->thursday_in_time == '') {
-				$thursday = '-';
-			} else {
-				$thursday = $thursday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' ' .$thursday_out_time->format('h:i a');
-			}
-			if($r->friday_in_time == '') {
-				$friday = '-';
-			} else {
-				$friday = $friday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' ' .$friday_out_time->format('h:i a');
-			}
-			if($r->saturday_in_time == '') {
-				$saturday = '-';
-			} else {
-				$saturday = $saturday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' ' .$saturday_out_time->format('h:i a');
-			}
-			if($r->sunday_in_time == '') {
-				$sunday = '-';
-			} else {
-				$sunday = $sunday_in_time->format('h:i a') .' ' . $this->lang->line('dashboard_to').' ' .$sunday_out_time->format('h:i a');
-			}
+			$prefijo = $r->prefijo;
+			$horaTrabajo = $r->hora_trabajo;
 			
 			// get company
 			$company = $this->Xin_model->read_company_info($r->company_id);
@@ -2377,54 +2344,55 @@ class Timesheet extends MY_Controller {
 			
 			if(in_array('281',$role_resources_ids)) { //edit
 				$edit = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_edit').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light edit-data" data-toggle="modal" data-target=".edit-modal-data" data-office_shift_id="'. $r->office_shift_id.'" ><span class="fa fa-pencil"></span></button></span>';
-			} else {
+			}
+			else {
 				$edit = '';
 			}
 			if(in_array('282',$role_resources_ids)) { // delete
 				$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $r->office_shift_id . '"><span class="fa fa-trash"></span></button></span>';
-			} else {
+			}
+			else {
 				$delete = '';
 			}
-		$functions = '';
-		if($r->default_shift=='' || $r->default_shift==0) {
-			if(in_array('2822',$role_resources_ids)) { // delete
-		 		$functions = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_make_default').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light default-shift" data-office_shift_id="'. $r->office_shift_id.'"><span class="fa fa-clock-o"></span></button></span>';
-			} else {
+
+			$functions = '';
+			if($r->default_shift=='' || $r->default_shift==0) {
+				if(in_array('2822',$role_resources_ids)) { // delete
+			 		$functions = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_make_default').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light default-shift" data-office_shift_id="'. $r->office_shift_id.'"><span class="fa fa-clock-o"></span></button></span>';
+				} else {
+					$functions = '';
+				}
+			 }
+			else {
 				$functions = '';
 			}
-		 } else {
-		 	$functions = '';
-		 }
-		 $combhr = $edit.$functions.$delete;
+	
+			$combhr = $edit.$functions.$delete;
 		
-		 if($r->default_shift==1){
+			if($r->default_shift==1){
 			$success = '<span class="badge badge-success">'.$this->lang->line('xin_default').'</span>';
-		 } else {
-			 $success = '';
-		 }
+			} else {
+			$success = '';
+			}
 
-		   $data[] = array(
+			$data[] = array(
 				$combhr,
 				$comp_name,
 				$r->shift_name . ' ' .$success,
-				$monday,
-				$tuesday,
-				$wednesday,
-				$thursday,
-				$friday,
-				$saturday,
-				$sunday
-		   );
-	  }
+				$prefijo,
+				$horaTrabajo
+			);
+	  	}
 
-	  $output = array(
-		   "draw" => $draw,
-			 "recordsTotal" => $office_shift->num_rows(),
-			 "recordsFiltered" => $office_shift->num_rows(),
-			 "data" => $data
+		$output = array(
+			"draw" => $draw,
+			"recordsTotal" => $office_shift->num_rows(),
+			"recordsFiltered" => $office_shift->num_rows(),
+			"data" => $data
 		);
-	  echo json_encode($output);
-	  exit();
+
+		echo json_encode($output);
+		exit();
      }
 	 
 	 // holidays_list > timesheet
@@ -3792,48 +3760,31 @@ class Timesheet extends MY_Controller {
 			
 		/* Server side PHP input validation */		
 		if($this->input->post('company_id')==='') {
+
         	$Return['error'] = $this->lang->line('error_company_field');
-		} else if($this->input->post('shift_name')==='') {
+		}
+		else if( $this->input->post('shift_name')==='' ) {
+
         	$Return['error'] = $this->lang->line('xin_error_shift_name_field');
-		} else if($this->input->post('monday_in_time')!='' && $this->input->post('monday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_monday_timeout');
-		} else if($this->input->post('tuesday_in_time')!='' && $this->input->post('tuesday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_tuesday_timeout');
-		} else if($this->input->post('wednesday_in_time')!='' && $this->input->post('wednesday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_wednesday_timeout');
-		} else if($this->input->post('thursday_in_time')!='' && $this->input->post('thursday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_thursday_timeout');
-		} else if($this->input->post('friday_in_time')!='' && $this->input->post('friday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_friday_timeout');
-		} else if($this->input->post('saturday_in_time')!='' && $this->input->post('saturday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_saturday_timeout');
-		} else if($this->input->post('sunday_in_time')!='' && $this->input->post('sunday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_sunday_timeout');
-		} 
+		}
+		else if( $this->input->post( 'prefijo' )=== '' || $this->input->post( 'hora_trabajo' ) === '' ) {
+
+			$Return['error'] = "Prefijo y Horas es obligatorio";
+		}	
 						
 		if($Return['error']!=''){
+
        		$this->output($Return);
     	}
 			
 		$data = array(
-		'shift_name' => $this->input->post('shift_name'),
-		'company_id' => $this->input->post('company_id'),
-		'monday_in_time' => $this->input->post('monday_in_time'),
-		'monday_out_time' => $this->input->post('monday_out_time'),
-		'tuesday_in_time' => $this->input->post('tuesday_in_time'),
-		'tuesday_out_time' => $this->input->post('tuesday_out_time'),
-		'wednesday_in_time' => $this->input->post('wednesday_in_time'),
-		'wednesday_out_time' => $this->input->post('wednesday_out_time'),
-		'thursday_in_time' => $this->input->post('thursday_in_time'),
-		'thursday_out_time' => $this->input->post('thursday_out_time'),
-		'friday_in_time' => $this->input->post('friday_in_time'),
-		'friday_out_time' => $this->input->post('friday_out_time'),
-		'saturday_in_time' => $this->input->post('saturday_in_time'),
-		'saturday_out_time' => $this->input->post('saturday_out_time'),
-		'sunday_in_time' => $this->input->post('sunday_in_time'),
-		'sunday_out_time' => $this->input->post('sunday_out_time'),
-		'created_at' => date('Y-m-d')
+			'shift_name' => $this->input->post('shift_name'),
+			'company_id' => $this->input->post('company_id'),
+			'prefijo' => $this->input->post('prefijo'),
+			'hora_trabajo' => $this->input->post('hora_trabajo'),
+			'created_at' => date('Y-m-d')
 		);
+
 		$result = $this->Timesheet_model->add_office_shift_record($data);
 		
 		if ($result == TRUE) {
