@@ -2081,9 +2081,7 @@ class Timesheet extends MY_Controller {
 			else {
 				$status = $this->lang->line('xin_absent');
 			}
-		}
-		
-		
+		}		
 		
 		// check if clock-out for date
 		$check_out = $this->Timesheet_model->attendance_first_out_check($employee[0]->user_id,$attendance_date);		
@@ -2155,13 +2153,7 @@ class Timesheet extends MY_Controller {
 			}	
 			// attendance date
 			$tdate = $this->Xin_model->set_date_format($attendance_date);
-			/*if($user_info[0]->user_role_id==1){
-				$fclckIn = $clkInIp;
-				$fclckOut = $clkOutIp;
-			} else {
-				$fclckIn = $clock_in2;
-				$fclckOut = $clock_out2;
-			}*/
+
 			$data[] = array(
 				$full_name,
 				$comp_name,
@@ -2175,24 +2167,10 @@ class Timesheet extends MY_Controller {
 				$total_work,
 				$Trest
 			);
-		
-		/*$data[] = array(
-			$status,
-			$tdate,
-			$clock_in2,
-			$clock_out2,
-			$total_time_l,
-			$total_time_e,
-			$overtime2,
-			$total_work,
-			$Trest
-		);*/
       }
 
 	  $output = array(
 		   "draw" => $draw,
-			 //"recordsTotal" => count($date_range),
-			 //"recordsFiltered" => count($date_range),
 			 "data" => $data
 		);
 	  echo json_encode($output);
@@ -2208,21 +2186,7 @@ class Timesheet extends MY_Controller {
 		$attendance_date = $this->input->get("attendance_date");
 		// get employee id
 		$employee_id = $this->input->get("employee_id");
-		/*// get user info >
-		$user = $this->xin_model->read_user_info($employee_id);
-		// user full name
-		$full_name = $user[0]->first_name.' '.$user[0]->last_name;
-		// get designation
-		$designation = $this->designation_model->read_designation_information($user[0]->designation_id);
-		// department
-		$department = $this->department_model->read_department_information($user[0]->department_id);
-		
-		$dept_des = $designation[0]->designation_name.' in '.$department[0]->department_name;
-		$employee_name = $full_name.' ('.$dept_des.')';
-		$data = array(
-				'employee_name' => $employee_name,
-				//'employee_id' => $result[0]->employee_id,
-				);*/
+
 		if(!empty($session)){ 
 			$this->load->view("admin/timesheet/update_attendance", $data);
 		} else {
@@ -2233,13 +2197,11 @@ class Timesheet extends MY_Controller {
 		$start = intval($this->input->get("start"));
 		$length = intval($this->input->get("length"));
 		
-		
-		
 		$attendance_employee = $this->Timesheet_model->attendance_employee_with_date($employee_id,$attendance_date);
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$data = array();
 
-          foreach($attendance_employee->result() as $r) {
+    	foreach($attendance_employee->result() as $r) {
 			  
 			// total work
 			$in_time = new DateTime($r->clock_in);
@@ -2478,7 +2440,7 @@ class Timesheet extends MY_Controller {
 		);
 	  echo json_encode($output);
 	  exit();
-     }
+	}
 	 
 	 // leave list > timesheet
 	 public function leave_list() {
@@ -2629,10 +2591,39 @@ class Timesheet extends MY_Controller {
 	{
 		$data['title'] = $this->Xin_model->site_title();
 		$employee_id = $this->input->get('employee_id');
+
+		$session = $this->session->userdata('username');	
+		
+		$role_resources_ids = $this->Xin_model->user_role_resource();
+		$user_info = $this->Xin_model->read_user_info($session['user_id']);
+
+		if($user_info[0]->user_role_id==1){
+
+			$office_shift = $this->Timesheet_model->get_office_shifts();
+		}
+		else {
+			
+			if(in_array('311',$role_resources_ids)) {
+				$office_shift = $this->Timesheet_model->get_company_shifts($user_info[0]->company_id);
+			} else {
+				$office_shift = $this->Xin_model->get_employee_shift_office($user_info[0]->office_shift_id);
+			}
+		}
+
+		foreach( $office_shift->result() as $r ){
+			  
+			$turnoData[] = array(
+				"id" => $r->office_shift_id,
+				"name" => $r->shift_name,
+				"prefijo" => $r->prefijo,
+				"horaTrabajo" => $r->hora_trabajo
+			);
+	  	}
+
 		$data = array(
 				'employee_id' => $employee_id,
+				'turno' => $turnoData
 				);
-		$session = $this->session->userdata('username');
 		if(!empty($session)){ 
 			$this->load->view('admin/timesheet/dialog_attendance', $data);
 		} else {
@@ -3016,43 +3007,49 @@ class Timesheet extends MY_Controller {
 		/* Server side PHP input validation */		
 		if($this->input->post('attendance_date_m')==='') {
         	$Return['error'] = $this->lang->line('xin_error_attendance_date');
-		} else if($this->input->post('clock_in_m')==='') {
-        	$Return['error'] = $this->lang->line('xin_error_attendance_in_time');
-		} else if($this->input->post('clock_out_m')==='') {
-        	$Return['error'] = $this->lang->line('xin_error_attendance_out_time');
 		}
+		elseif( $this->input->post( 'turno' ) === '' ) {
+
+        	$Return['error'] = "El turno es obligatorio";
+		}
+
+		$turno = $this->input->post( 'turno' );
+		$attendance_date = $this->input->post('attendance_date_m');
+		$emp_id = $this->input->post( 'employee_id_m' );
+
+		$horarioResult = $this->Timesheet_model->get_HourDateEmployee( $emp_id, $attendance_date );
+		$turnoHora = $this->Timesheet_model->read_office_shift_information( $turno );
+		$turnoHora = $turnoHora[0]->hora_trabajo;
+		$sumHoras = 0;
+
+		if( count( $horarioResult ) > 0 ){
+
+			for( $hr = 0; $hr < count( $horarioResult ); $hr++ ){
+
+				$hourActive = explode( ":", $horarioResult[$hr]->total_work );
+				$sumHoras = $sumHoras + $hourActive[0];
+			}
+		}
+
+		if( ( $sumHoras + $turnoHora ) > 24 ){
+
+			$Return['error'] = "El empleado ya tiene registrado 24 horas el día de hoy";
+		}
+		
 				
 		if($Return['error']!=''){
+
        		$this->output($Return);
     	}
-		
-		$attendance_date = $this->input->post('attendance_date_m');
-		$clock_in = $this->input->post('clock_in_m');
-		$clock_out = $this->input->post('clock_out_m');
-		
-		$clock_in2 = $attendance_date.' '.$clock_in.':00';
-		$clock_out2 = $attendance_date.' '.$clock_out.':00';
-		
-		//total work
-		$total_work_cin =  new DateTime($clock_in2);
-		$total_work_cout =  new DateTime($clock_out2);
-		
-		$interval_cin = $total_work_cout->diff($total_work_cin);
-		$hours_in   = $interval_cin->format('%h');
-		$minutes_in = $interval_cin->format('%i');
-		$total_work = $hours_in .":".$minutes_in;
+
+		$total_work = $turnoHora .":00";
 	
 		$data = array(
-		'employee_id' => $this->input->post('employee_id_m'),
-		'attendance_date' => $attendance_date,
-		'clock_in' => $clock_in2,
-		'clock_out' => $clock_out2,
-		'time_late' => $clock_in2,
-		'total_work' => $total_work,
-		'early_leaving' => $clock_out2,
-		'overtime' => $clock_out2,
-		'attendance_status' => 'Asistencia',
-		'clock_in_out' => '0'
+			'employee_id' => $emp_id,
+			'attendance_date' => $attendance_date,
+			'total_work' => $total_work,
+			'attendance_status' => 'Asistencia',
+			'clock_in_out' => '0'
 		);
 		$result = $this->Timesheet_model->add_employee_attendance($data);
 		
@@ -4090,101 +4087,5 @@ class Timesheet extends MY_Controller {
 					$this->output($Return);
 					exit;
 				}
-			//} else {
-				/* Define return | here result is used to return user data and error for error message */
-					//$Return = array('result'=>'', 'error'=>'', 'csrf_hash'=>'');
-//					$Return['csrf_hash'] = $this->security->get_csrf_hash();
-//					
-//					$session = $this->session->userdata('username');
-//					
-//					$employee_id = $session['user_id'];
-//					$latitude = $this->input->post('latitude');
-//					$longitude = $this->input->post('longitude');
-//					$clock_state = $this->input->post('clock_state');
-//					$time_id = $this->input->post('time_id');
-//					// set time
-//					$nowtime = date("Y-m-d H:i:s");
-//					//$date = date('Y-m-d H:i:s', strtotime($nowtime . ' + 4 hours'));
-//					$date = date('Y-m-d H:i:s');
-//					$curtime = $date;
-//					$today_date = date('Y-m-d');	
-//					
-//					if($clock_state=='clock_in') {
-//						$query = $this->Timesheet_model->check_user_attendance();
-//						$result = $query->result();
-//						if($query->num_rows() < 1) {
-//							$total_rest = '';
-//						} else {
-//							$cout =  new DateTime($result[0]->clock_out);
-//							$cin =  new DateTime($curtime);
-//							
-//							$interval_cin = $cin->diff($cout);
-//							$hours_in   = $interval_cin->format('%h');
-//							$minutes_in = $interval_cin->format('%i');
-//							$total_rest = $hours_in .":".$minutes_in;
-//						}
-//						
-//						$data = array(
-//						'employee_id' => $employee_id,
-//						'attendance_date' => $today_date,
-//						'clock_in' => $curtime,
-//						'clock_in_ip_address' => $this->input->ip_address(),
-//						'clock_in_latitude' => $latitude,
-//						'clock_in_longitude' => $longitude,
-//						'time_late' => $curtime,
-//						'early_leaving' => $curtime,
-//						'overtime' => $curtime,
-//						'total_rest' => $total_rest,
-//						'attendance_status' => 'Asistencia',
-//						'clock_in_out' => '1'
-//						);
-//						
-//						$result = $this->Timesheet_model->add_new_attendance($data);
-//									
-//						if ($result == TRUE) {
-//							$Return['result'] = $this->lang->line('xin_success_clocked_in');
-//						} else {
-//							$Return['error'] = $this->lang->line('xin_error_msg');
-//						}
-//					} else if($clock_state=='clock_out') {
-//						
-//						$query = $this->Timesheet_model->check_user_attendance_clockout();
-//						$clocked_out = $query->result();
-//						$total_work_cin =  new DateTime($clocked_out[0]->clock_in);
-//						$total_work_cout =  new DateTime($curtime);
-//						
-//						$interval_cin = $total_work_cout->diff($total_work_cin);
-//						$hours_in   = $interval_cin->format('%h');
-//						$minutes_in = $interval_cin->format('%i');
-//						$total_work = $hours_in .":".$minutes_in;
-//						
-//						$data = array(
-//							'clock_out' => $curtime,
-//							'clock_in_out' => '0',
-//							'clock_out_ip_address' => $this->input->ip_address(),
-//							'clock_out_latitude' => $latitude,
-//							'clock_out_longitude' => $longitude,
-//							'early_leaving' => $curtime,
-//							'overtime' => $curtime,
-//							'total_work' => $total_work
-//						);
-//						
-//			
-//						$id = $this->input->post('time_id');
-//						$resuslt2 = $this->Timesheet_model->update_attendance_clockedout($data,$id);
-//						
-//						if ($resuslt2 == TRUE) {
-//							$Return['result'] = $this->lang->line('xin_success_clocked_out');
-//							$Return['time_id'] = '';
-//						} else {
-//							$Return['error'] = $this->lang->line('xin_error_msg');
-//						}
-//					
-//					}
-//						
-//					$this->output($Return);
-//					exit;
-			//}
-		//}
 	}
 }

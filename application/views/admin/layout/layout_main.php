@@ -9,17 +9,20 @@ $theme = $this->Xin_model->read_theme_info(1);
 // set layout / fixed or static
 if($user_info[0]->fixed_header=='fixed_layout_hrsale') {
 	$fixed_header = 'fixed';
-} else {
+}
+else {
 	$fixed_header = '';
 }
 if($user_info[0]->boxed_wrapper=='boxed_layout_hrsale') {
 	$boxed_wrapper = 'layout-boxed';
-} else {
+}
+else {
 	$boxed_wrapper = '';
 }
 if($user_info[0]->compact_sidebar=='sidebar_layout_hrsale') {
 	$compact_sidebar = 'sidebar-collapse';
-} else {
+}
+else {
 	$compact_sidebar = '';
 }
 /*
@@ -31,7 +34,8 @@ if($this->router->fetch_class() =='chat'){
 $role_user = $this->Xin_model->read_user_role_info($user_info[0]->user_role_id);
 if(!is_null($role_user)){
 	$role_resources_ids = explode(',',$role_user[0]->role_resources);
-} else {
+}
+else {
 	$role_resources_ids = explode(',',0);	
 }
 ?>

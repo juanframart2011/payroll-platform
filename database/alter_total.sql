@@ -17,3 +17,16 @@ CHANGE COLUMN `sunday_in_time` `sunday_in_time` VARCHAR(222) NULL ,
 CHANGE COLUMN `sunday_out_time` `sunday_out_time` VARCHAR(222) NULL;
 
 UPDATE `vakandirh`.`xin_office_shift` SET `hora_trabajo` = '24' WHERE (`office_shift_id` = '1');
+
+ALTER TABLE `vakandirh`.`xin_attendance_time` 
+CHANGE COLUMN `clock_in` `clock_in` VARCHAR(255) NULL ,
+CHANGE COLUMN `clock_in_ip_address` `clock_in_ip_address` VARCHAR(255) NULL ,
+CHANGE COLUMN `clock_out` `clock_out` VARCHAR(255) NULL ,
+CHANGE COLUMN `clock_out_ip_address` `clock_out_ip_address` VARCHAR(255) NULL ,
+CHANGE COLUMN `clock_in_out` `clock_in_out` VARCHAR(255) NULL ,
+CHANGE COLUMN `clock_in_latitude` `clock_in_latitude` VARCHAR(150) NULL ,
+CHANGE COLUMN `clock_in_longitude` `clock_in_longitude` VARCHAR(150) NULL ,
+CHANGE COLUMN `clock_out_latitude` `clock_out_latitude` VARCHAR(150) NULL ,
+CHANGE COLUMN `clock_out_longitude` `clock_out_longitude` VARCHAR(150) NULL ,
+CHANGE COLUMN `time_late` `time_late` VARCHAR(255) NULL ,
+CHANGE COLUMN `overtime` `overtime` VARCHAR(255) NULL ;

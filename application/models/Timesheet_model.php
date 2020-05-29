@@ -316,6 +316,15 @@
 		
 		return $query;
 	}
+
+	public function get_HourDateEmployee( $emp_id, $attendance_date ){
+		
+		$sql = 'SELECT total_work FROM xin_attendance_time where attendance_date = ? and employee_id = ?';
+		$binds = array($attendance_date,$emp_id);
+		$query = $this->db->query($sql, $binds);
+		
+		return $query->result();
+	}
 		 
 	 // get record of office shift > by id
 	 public function read_office_shift_information($id) {
