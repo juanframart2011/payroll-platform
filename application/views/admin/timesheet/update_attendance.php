@@ -101,9 +101,9 @@
             <thead>
               <tr>
                 <th><?php echo $this->lang->line('xin_action');?></th>
-                <th><?php echo $this->lang->line('xin_in_time');?></th>
-                <th><?php echo $this->lang->line('xin_out_time');?></th>
-                <th><?php echo $this->lang->line('dashboard_total_work');?></th>
+                <th>Fecha</th>
+                <th>Turno</th>
+                <th>Horas</th>
               </tr>
             </thead>
           </table>

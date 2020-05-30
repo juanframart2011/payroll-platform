@@ -2202,29 +2202,21 @@ class Timesheet extends MY_Controller {
 		$data = array();
 
     	foreach($attendance_employee->result() as $r) {
-			  
-			// total work
-			$in_time = new DateTime($r->clock_in);
-			$out_time = new DateTime($r->clock_out);
 			
-			$clock_in = $in_time->format('h:i a');			
-			// attendance date
-			$att_date_in = explode(' ',$r->clock_in);
-			$att_date_out = explode(' ',$r->clock_out);
-			$cidate = $this->Xin_model->set_date_format($att_date_in[0]);
-			$cin_date = $cidate.' '.$clock_in;
-			if($r->clock_out=='') {
-				$cout_date = '-';
-				$total_time = '-';
-			} else {
-				$clock_out = $out_time->format('h:i a');
-				$interval = $in_time->diff($out_time);
-				$hours  = $interval->format('%h');
-				$minutes = $interval->format('%i');			
-				$total_time = $hours ."h ".$minutes."m";
-				$codate = $this->Xin_model->set_date_format($att_date_out[0]);
-				$cout_date = $codate.' '.$clock_out;
+			$dateCreate = $r->attendance_date;
+			$totalWork = $r->total_work;
+
+			$officeShiftResult = $this->Timesheet_model->read_office_shift_information( $r->office_shift_id );
+			if( !empty( $officeShiftResult ) ){
+
+				$turno = $officeShiftResult[0]->shift_name;
 			}
+			else{
+
+				$turno = '';
+			}
+			
+			
 			if(in_array('278',$role_resources_ids)) { //edit
 				$edit = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_edit').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light edit-data" data-toggle="modal" data-target=".edit-modal-data" data-attendance_id="'.$r->time_attendance_id.'"><i class="fa fa-pencil"></i></button></span>';
 			} else {
@@ -2240,21 +2232,21 @@ class Timesheet extends MY_Controller {
 
 		   $data[] = array(
 				$combhr,
-				$cin_date,
-				$cout_date,
-				$total_time
+				$dateCreate,
+				$turno,
+				$totalWork
 		   );
-	  }
+		}
 
-	  $output = array(
-		   "draw" => $draw,
-			 "recordsTotal" => $attendance_employee->num_rows(),
-			 "recordsFiltered" => $attendance_employee->num_rows(),
-			 "data" => $data
+		$output = array(
+			"draw" => $draw,
+			"recordsTotal" => $attendance_employee->num_rows(),
+			"recordsFiltered" => $attendance_employee->num_rows(),
+			"data" => $data
 		);
-	  echo json_encode($output);
-	  exit();
-     }
+		echo json_encode($output);
+		exit();
+	}
 	 
 	 // update_attendance_list > timesheet
 	 public function office_shift_list() {
@@ -3048,7 +3040,8 @@ class Timesheet extends MY_Controller {
 			'attendance_date' => $attendance_date,
 			'total_work' => $total_work,
 			'attendance_status' => 'Asistencia',
-			'clock_in_out' => '0'
+			'clock_in_out' => '0',
+			'office_shift_id' => $turno
 		);
 		$result = $this->Timesheet_model->add_employee_attendance($data);
 		

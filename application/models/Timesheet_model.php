@@ -46,6 +46,16 @@
 
 		return $query;
 	}
+
+	// check if check-in available
+	public function attendance_first_in_check_all($employee_id,$attendance_date) {
+	
+		$sql = 'SELECT * FROM xin_attendance_time WHERE employee_id = ? and attendance_date = ?';
+		$binds = array($employee_id,$attendance_date);
+		$query = $this->db->query($sql, $binds);
+
+		return $query->result();
+	}
 	
 	// get user attendance
 	public function attendance_time_check($employee_id) {

@@ -181,100 +181,103 @@ $imonth = date('F', $date);
             <td><?php echo $employee_name;?></td>
             <?php
 			for($i = 1; $i <= $daysInMonth; $i++):
-			$i = str_pad($i, 2, 0, STR_PAD_LEFT);
-			// get date <
-			$attendance_date = $year.'-'.$month.'-'.$i;
-			$get_day = strtotime($attendance_date);
-			$day = date('l', $get_day);
-			$user_id = $r->user_id;
-			// office shift
-			$office_shift = $this->Timesheet_model->read_office_shift_information($r->office_shift_id);
-			// get holiday
-			$h_date_chck = $this->Timesheet_model->holiday_date_check($attendance_date);
-			$holiday_arr = array();
-			if($h_date_chck->num_rows() == 1){
-				$h_date = $this->Timesheet_model->holiday_date($attendance_date);
-				$begin = new DateTime( $h_date[0]->start_date );
-				$end = new DateTime( $h_date[0]->end_date);
-				$end = $end->modify( '+1 day' ); 
+
+				$i = str_pad($i, 2, 0, STR_PAD_LEFT);
+				// get date <
+				$attendance_date = $year.'-'.$month.'-'.$i;
+				$get_day = strtotime($attendance_date);
+				$day = date('l', $get_day);
+				$user_id = $r->user_id;
+				// office shift
+				$office_shift = $this->Timesheet_model->read_office_shift_information($r->office_shift_id);
+				// get holiday
+				$h_date_chck = $this->Timesheet_model->holiday_date_check($attendance_date);
+				$holiday_arr = array();
 				
-				$interval = new DateInterval('P1D');
-				$daterange = new DatePeriod($begin, $interval ,$end);
-				
-				foreach($daterange as $date){
-					$holiday_arr[] =  $date->format("Y-m-d");
+				if($h_date_chck->num_rows() == 1){
+
+					$h_date = $this->Timesheet_model->holiday_date($attendance_date);
+					$begin = new DateTime( $h_date[0]->start_date );
+					$end = new DateTime( $h_date[0]->end_date);
+					$end = $end->modify( '+1 day' ); 
+					
+					$interval = new DateInterval('P1D');
+					$daterange = new DatePeriod($begin, $interval ,$end);
+					
+					foreach($daterange as $date){
+						
+						$holiday_arr[] =  $date->format("Y-m-d");
+					}
 				}
-			} else {
-				$holiday_arr[] = '99-99-99';
-			}
-			//echo '<pre>'; print_r($holiday_arr);
-			// get leave/employee
-			$leave_date_chck = $this->Timesheet_model->leave_date_check($r->user_id,$attendance_date);
-			$leave_arr = array();
-			if($leave_date_chck->num_rows() == 1){
-				$leave_date = $this->Timesheet_model->leave_date($r->user_id,$attendance_date);
-				$begin1 = new DateTime( $leave_date[0]->from_date );
-				$end1 = new DateTime( $leave_date[0]->to_date);
-				$end1 = $end1->modify( '+1 day' ); 
+				else{
+
+					$holiday_arr[] = '99-99-99';
+				}
+				//echo '<pre>'; print_r($holiday_arr);
+				// get leave/employee
+				$leave_date_chck = $this->Timesheet_model->leave_date_check($r->user_id,$attendance_date);
+				$leave_arr = array();
+				if($leave_date_chck->num_rows() == 1){
+					$leave_date = $this->Timesheet_model->leave_date($r->user_id,$attendance_date);
+					$begin1 = new DateTime( $leave_date[0]->from_date );
+					$end1 = new DateTime( $leave_date[0]->to_date);
+					$end1 = $end1->modify( '+1 day' ); 
+					
+					$interval1 = new DateInterval('P1D');
+					$daterange1 = new DatePeriod($begin1, $interval1 ,$end1);
+					
+					foreach($daterange1 as $date1){
+						$leave_arr[] =  $date1->format("Y-m-d");
+					}	
+				}
+				else {
+
+					$leave_arr[] = '99-99-99';
+				}
+
+				$attendance_status = '';
+				$check = $this->Timesheet_model->attendance_first_in_check($r->user_id,$attendance_date);
+
+				if( $check->num_rows() > 0 ){
+
+					$attendance = $this->Timesheet_model->attendance_first_in($r->user_id,$attendance_date);
+					$turno = '';
+					$checkResult = $this->Timesheet_model->attendance_first_in_check_all( $r->user_id, $attendance_date );
+					for( $cr = 0; $cr < count( $checkResult ); $cr++ ){
+
+						$officeShiftResult = $this->Timesheet_model->read_office_shift_information( $checkResult[$cr]->office_shift_id );
+						$turno .= $officeShiftResult[0]->prefijo . "<br>";
+					}
+
+					$status = $turno;//$attendance[0]->attendance_status;
+				}
+				else {					
+					 
+					$status = 'F';
+					//$pcount += 0;
+				}
+
+				$pcount += $check->num_rows();
+				// set to present date
+				$iattendance_date = strtotime($attendance_date);
+				$icurrent_date = strtotime(date('Y-m-d'));
 				
-				$interval1 = new DateInterval('P1D');
-				$daterange1 = new DatePeriod($begin1, $interval1 ,$end1);
+				if($iattendance_date <= $icurrent_date){
+					$status = $status;
+				} else {
+					$status = '';
+				}
+				$idate_of_joining = strtotime($r->date_of_joining);
+				if($idate_of_joining < $iattendance_date){
+					$status = $status;
+				} else {
+					$status = '';
+				}
 				
-				foreach($daterange1 as $date1){
-					$leave_arr[] =  $date1->format("Y-m-d");
-				}	
-			} else {
-				$leave_arr[] = '99-99-99';
-			}
-			$attendance_status = '';
-			$check = $this->Timesheet_model->attendance_first_in_check($r->user_id,$attendance_date);
-			if($office_shift[0]->monday_in_time == '' && $day == 'Monday') {
-				$status = 'D';	
-			} else if($office_shift[0]->tuesday_in_time == '' && $day == 'Tuesday') {
-				$status = 'D';
-			} else if($office_shift[0]->wednesday_in_time == '' && $day == 'Wednesday') {
-				$status = 'D';
-			} else if($office_shift[0]->thursday_in_time == '' && $day == 'Thursday') {
-				$status = 'D';
-			} else if($office_shift[0]->friday_in_time == '' && $day == 'Friday') {
-				$status = 'D';
-			} else if($office_shift[0]->saturday_in_time == '' && $day == 'Saturday') {
-				$status = 'D';
-			} else if($office_shift[0]->sunday_in_time == '' && $day == 'Sunday') {
-				$status = 'D';
-			} else if(in_array($attendance_date,$holiday_arr)) { // holiday
-				$status = 'V';
-			} else if(in_array($attendance_date,$leave_arr)) { // on leave
-				$status = 'S';
-			} else if($check->num_rows() > 0){
-			$attendance = $this->Timesheet_model->attendance_first_in($r->user_id,$attendance_date);
-			$status = 'A';//$attendance[0]->attendance_status;
-				
-			} else {
-				
-				 
-				$status = 'F';
-				//$pcount += 0;
-			}
-			$pcount += $check->num_rows();
-			// set to present date
-			$iattendance_date = strtotime($attendance_date);
-			$icurrent_date = strtotime(date('Y-m-d'));
-			if($iattendance_date <= $icurrent_date){
-				$status = $status;
-			} else {
-				$status = '';
-			}
-			$idate_of_joining = strtotime($r->date_of_joining);
-			if($idate_of_joining < $iattendance_date){
-				$status = $status;
-			} else {
-				$status = '';
-			}
-			
-			?>
-            <td><?php echo $status; ?></td>
-            <?php endfor; ?>
+				?>
+	            <td><?php echo $status; ?></td>
+            <?php 
+        	endfor;?>
             <td><?php echo $pcount;?></td>
           </tr>
           <?php endforeach;?>
