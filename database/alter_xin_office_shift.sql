@@ -1,4 +1,4 @@
-ALTER TABLE `vakandirh`.`xin_office_shift` 
+ALTER TABLE `xin_office_shift` 
 ADD COLUMN `prefijo` VARCHAR(222) NOT NULL AFTER `sunday_out_time`,
 ADD COLUMN `hora_trabajo` VARCHAR(222) NOT NULL AFTER `prefijo`,
 CHANGE COLUMN `monday_in_time` `monday_in_time` VARCHAR(222) NULL ,
@@ -16,4 +16,4 @@ CHANGE COLUMN `saturday_out_time` `saturday_out_time` VARCHAR(222) NULL ,
 CHANGE COLUMN `sunday_in_time` `sunday_in_time` VARCHAR(222) NULL ,
 CHANGE COLUMN `sunday_out_time` `sunday_out_time` VARCHAR(222) NULL;
 
-UPDATE `vakandirh`.`xin_office_shift` SET `hora_trabajo` = '24' WHERE (`office_shift_id` = '1');
+UPDATE `xin_office_shift` SET `hora_trabajo` = '24' WHERE (`office_shift_id` = '1');

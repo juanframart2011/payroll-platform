@@ -3033,9 +3033,8 @@ class Timesheet extends MY_Controller {
 
 		if( ( $sumHoras + $turnoHora ) > 24 ){
 
-			$Return['error'] = "El empleado ya tiene registrado 24 horas el día de hoy";
-		}
-		
+			$Return['error'] = "El empleado no puede exceder 24 horas el día de hoy";
+		}		
 				
 		if($Return['error']!=''){
 
@@ -3543,16 +3542,44 @@ class Timesheet extends MY_Controller {
 		} else {
 			$clock_out = $out_time->format('H:i');
 		}
+
+		$session = $this->session->userdata('username');	
+		
+		$role_resources_ids = $this->Xin_model->user_role_resource();
+		$user_info = $this->Xin_model->read_user_info($session['user_id']);
+
+		if($user_info[0]->user_role_id==1){
+
+			$office_shift = $this->Timesheet_model->get_office_shifts();
+		}
+		else {
+			
+			if(in_array('311',$role_resources_ids)) {
+				$office_shift = $this->Timesheet_model->get_company_shifts($user_info[0]->company_id);
+			} else {
+				$office_shift = $this->Xin_model->get_employee_shift_office($user_info[0]->office_shift_id);
+			}
+		}
+
+		foreach( $office_shift->result() as $r ){
+			  
+			$turnoData[] = array(
+				"id" => $r->office_shift_id,
+				"name" => $r->shift_name,
+				"prefijo" => $r->prefijo,
+				"horaTrabajo" => $r->hora_trabajo
+			);
+	  	}
 		
 		$data = array(
 				'time_attendance_id' => $result[0]->time_attendance_id,
 				'employee_id' => $result[0]->employee_id,
 				'full_name' => $full_name,
 				'attendance_date' => $result[0]->attendance_date,
-				'clock_in' => $clock_in,
-				'clock_out' => $clock_out
+				'office_shift_id' => $result[0]->office_shift_id,
+				'turno' => $turnoData
 				);
-		$session = $this->session->userdata('username');
+
 		if(!empty($session)){ 
 			$this->load->view('admin/timesheet/dialog_attendance', $data);
 		} else {
@@ -3596,21 +3623,9 @@ class Timesheet extends MY_Controller {
 				'office_shift_id' => $result[0]->office_shift_id,
 				'company_id' => $result[0]->company_id,
 				'shift_name' => $result[0]->shift_name,
-				'monday_in_time' => $result[0]->monday_in_time,
-				'monday_out_time' => $result[0]->monday_out_time,
-				'tuesday_in_time' => $result[0]->tuesday_in_time,
-				'tuesday_out_time' => $result[0]->tuesday_out_time,
-				'wednesday_in_time' => $result[0]->wednesday_in_time,
-				'wednesday_out_time' => $result[0]->wednesday_out_time,
-				'thursday_in_time' => $result[0]->thursday_in_time,
-				'thursday_out_time' => $result[0]->thursday_out_time,
-				'friday_in_time' => $result[0]->friday_in_time,
-				'friday_out_time' => $result[0]->friday_out_time,
-				'saturday_in_time' => $result[0]->saturday_in_time,
-				'saturday_out_time' => $result[0]->saturday_out_time,
-				'sunday_in_time' => $result[0]->sunday_in_time,
+				'prefijo' => $result[0]->prefijo,
 				'get_all_companies' => $this->Xin_model->get_companies(),
-				'sunday_out_time' => $result[0]->sunday_out_time
+				'hora_trabajo' => $result[0]->hora_trabajo
 				);
 		$session = $this->session->userdata('username');
 		if(!empty($session)){ 
@@ -3654,54 +3669,57 @@ class Timesheet extends MY_Controller {
         	$Return['error'] = $this->lang->line('xin_error_attendance_date');
 		} else if($this->input->post('clock_in')==='') {
         	$Return['error'] = $this->lang->line('xin_error_attendance_in_time');
-		} /*else if($this->input->post('clock_out')==='') {
-        	$Return['error'] = "The office Out Time field is required.";
-		}*/
+		}
+		elseif( $this->input->post( 'turno' ) === '' ) {
+
+        	$Return['error'] = "El turno es obligatorio";
+		}
+
+		//
+		$turnoCurrent = $this->Timesheet_model->read_attendance_information( $id );
+		$turnoCurrent = $turnoCurrent[0]->office_shift_id;
+
+		$turno = $this->input->post( 'turno' );
+		$attendance_date = $this->input->post('attendance_date_e');
+		$emp_id = $this->input->post('emp_att');
+
+		$horarioResult = $this->Timesheet_model->get_HourDateEmployee( $emp_id, $attendance_date );
+		$turnoHora = $this->Timesheet_model->read_office_shift_information( $turno );
+
+		$turnoHora = $turnoHora[0]->hora_trabajo;
+		$sumHoras = 0;
+
+		if( count( $horarioResult ) > 0 ){
+
+			for( $hr = 0; $hr < count( $horarioResult ); $hr++ ){
+
+				if( $turnoCurrent != $horarioResult[$hr]->office_shift_id ){
+
+					$hourActive = explode( ":", $horarioResult[$hr]->total_work );
+					$sumHoras = $sumHoras + $hourActive[0];
+				}
+			}
+		}
+
+		if( ( $sumHoras + $turnoHora ) > 24 ){
+
+			$Return['error'] = "El empleado no puede exceder 24 horas el día de hoy";
+		}
 				
 		if($Return['error']!=''){
        		$this->output($Return);
     	}
 		
-		$attendance_date = $this->input->post('attendance_date_e');
-		$clock_in = $this->input->post('clock_in');
-		
-		$clock_in2 = $attendance_date.' '.$clock_in.':00';
-		
-		//total work
-		$total_work_cin =  new DateTime($clock_in2);
-		
-		if($this->input->post('clock_out') ==='') {
-			$data = array(
-			'employee_id' => $this->input->post('emp_att'),
-			'attendance_date' => $attendance_date,
-			'clock_in' => $clock_in2,
-			'time_late' => $clock_in2,
-			'early_leaving' => $clock_in2,
-			'overtime' => $clock_in2,
+		$total_work = $turnoHora .":00";
+	
+		$data = array(
+		'employee_id' => $this->input->post('emp_att'),
+		'attendance_date' => $attendance_date,
+		'total_work' => $total_work,
+		'attendance_status' => 'Asistencia',
+		'clock_in_out' => '0',
+		'office_shift_id' => $turno
 		);
-		} else {
-			$clock_out = $this->input->post('clock_out');
-			$clock_out2 = $attendance_date.' '.$clock_out.':00';
-			$total_work_cout =  new DateTime($clock_out2);
-			
-			$interval_cin = $total_work_cout->diff($total_work_cin);
-			$hours_in   = $interval_cin->format('%h');
-			$minutes_in = $interval_cin->format('%i');
-			$total_work = $hours_in .":".$minutes_in;
-		
-			$data = array(
-			'employee_id' => $this->input->post('emp_att'),
-			'attendance_date' => $attendance_date,
-			'clock_in' => $clock_in2,
-			'clock_out' => $clock_out2,
-			'time_late' => $clock_in2,
-			'total_work' => $total_work,
-			'early_leaving' => $clock_out2,
-			'overtime' => $clock_out2,
-			'attendance_status' => 'Asistencia',
-			'clock_in_out' => '0'
-			);
-		}
 		
 		$result = $this->Timesheet_model->update_attendance_record($data,$id);		
 		
@@ -3810,21 +3828,11 @@ class Timesheet extends MY_Controller {
 			$Return['error'] = $this->lang->line('error_company_field');
 		} else if($this->input->post('shift_name')==='') {
         	$Return['error'] = $this->lang->line('xin_error_shift_name_field');
-		} else if($this->input->post('monday_in_time')!='' && $this->input->post('monday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_monday_timeout');
-		} else if($this->input->post('tuesday_in_time')!='' && $this->input->post('tuesday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_tuesday_timeout');
-		} else if($this->input->post('wednesday_in_time')!='' && $this->input->post('wednesday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_wednesday_timeout');
-		} else if($this->input->post('thursday_in_time')!='' && $this->input->post('thursday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_thursday_timeout');
-		} else if($this->input->post('friday_in_time')!='' && $this->input->post('friday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_friday_timeout');
-		} else if($this->input->post('saturday_in_time')!='' && $this->input->post('saturday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_saturday_timeout');
-		} else if($this->input->post('sunday_in_time')!='' && $this->input->post('sunday_out_time')==='') {
-			$Return['error'] = $this->lang->line('xin_error_shift_sunday_timeout');
-		} 
+		}
+		else if( $this->input->post( 'prefijo' )=== '' || $this->input->post( 'hora_trabajo' ) === '' ) {
+
+			$Return['error'] = "Prefijo y Horas es obligatorio";
+		}
 						
 		if($Return['error']!=''){
        		$this->output($Return);
@@ -3833,20 +3841,8 @@ class Timesheet extends MY_Controller {
 		$data = array(
 		'shift_name' => $this->input->post('shift_name'),
 		'company_id' => $this->input->post('company_id'),
-		'monday_in_time' => $this->input->post('monday_in_time'),
-		'monday_out_time' => $this->input->post('monday_out_time'),
-		'tuesday_in_time' => $this->input->post('tuesday_in_time'),
-		'tuesday_out_time' => $this->input->post('tuesday_out_time'),
-		'wednesday_in_time' => $this->input->post('wednesday_in_time'),
-		'wednesday_out_time' => $this->input->post('wednesday_out_time'),
-		'thursday_in_time' => $this->input->post('thursday_in_time'),
-		'thursday_out_time' => $this->input->post('thursday_out_time'),
-		'friday_in_time' => $this->input->post('friday_in_time'),
-		'friday_out_time' => $this->input->post('friday_out_time'),
-		'saturday_in_time' => $this->input->post('saturday_in_time'),
-		'saturday_out_time' => $this->input->post('saturday_out_time'),
-		'sunday_in_time' => $this->input->post('sunday_in_time'),
-		'sunday_out_time' => $this->input->post('sunday_out_time')
+		'prefijo' => $this->input->post('prefijo'),
+		'hora_trabajo' => $this->input->post('hora_trabajo')
 		);
 		
 		$result = $this->Timesheet_model->update_shift_record($data,$id);		

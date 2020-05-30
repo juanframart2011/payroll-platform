@@ -159,20 +159,20 @@ else if(isset($_GET['jd']) && isset($_GET['attendance_id']) && $_GET['type']=='a
 	<label for="date"><?php echo $this->lang->line('xin_attendance_date');?></label>
 	<input class="form-control attendance_date_e" placeholder="<?php echo $this->lang->line('xin_attendance_date');?>" readonly="true" id="attendance_date_e" name="attendance_date_e" type="text" value="<?php echo $attendance_date;?>">
 	</div>
-	<div class="row">
-	<div class="col-md-6">
-	<div class="form-group">
-	<label for="clock_in"><?php echo $this->lang->line('xin_office_in_time');?></label>
-	<input class="form-control timepicker" placeholder="<?php echo $this->lang->line('xin_office_in_time');?>" readonly="true" name="clock_in" type="text" value="<?php echo $clock_in;?>">
-	</div>
-	</div>
-	<div class="col-md-6">
-	<div class="form-group">
-	<label for="clock_out"><?php echo $this->lang->line('xin_office_out_time');?></label>
-	<input class="form-control timepicker" placeholder="<?php echo $this->lang->line('xin_office_out_time');?>" readonly="true" name="clock_out" type="text" value="<?php echo $clock_out;?>">
-	</div>
-	</div>
-	</div>
+		<div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="form-group">
+                    <label for="clock_in">Turno</label>
+                    <select name="turno" id="turno" class="form-control">
+                    	<option value="">Selecciona Turno</option>
+                    	<? for( $t = 0; $t < count( $turno ); $t++ ):?>
+                    		<option <?= ( $turno[$t]['id'] == $office_shift_id )?'selected' : '' ?> value="<?= $turno[$t]['id'] ?>"><?= $turno[$t]["name"] ?></option>
+                    	<?
+                    	endfor;?>
+                    </select>
+                </div>
+            </div>
+        </div>
 	</div>
 	</div>
 	</div>

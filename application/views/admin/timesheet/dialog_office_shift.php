@@ -43,96 +43,29 @@ if(isset($_GET['jd']) && isset($_GET['office_shift_id']) && $_GET['data']=='shif
         </div>
         <?php } ?>
         <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_shift_name');?></label>
-          <div class="col-md-4">
-            <input class="form-control" placeholder="<?php echo $this->lang->line('xin_shift_name');?>" name="shift_name" type="text" id="name" value="<?php echo $shift_name;?>">
-          </div>
+            <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_shift_name');?></label>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="<?php echo $this->lang->line('xin_shift_name');?>" name="shift_name" type="text" id="name" value="<?php echo $shift_name;?>">
+            </div>
         </div>
         <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_monday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-1" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="monday_in_time" type="text" value="<?php echo $monday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-1" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="monday_out_time" type="text" value="<?php echo $monday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="1"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
+            <label for="time" class="col-md-2">Prefijo</label>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Prefijo" name="prefijo" type="text" value="<?php echo $prefijo;?>">
+            </div>
         </div>
         <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_tuesday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-2" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="tuesday_in_time" type="text" value="<?php echo $tuesday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-2" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="tuesday_out_time" type="text" value="<?php echo $tuesday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="2"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
+            <label for="time" class="col-md-2">Hora de Trabajo</label>
+            <div class="col-md-4">
+                <input class="form-control" placeholder="Hora de Trabajo" name="hora_trabajo" type="text" value="<?php echo $hora_trabajo;?>">
+            </div>
         </div>
         <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_wednesday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-3" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="wednesday_in_time" type="text" value="<?php echo $wednesday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-3" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="wednesday_out_time" type="text" value="<?php echo $wednesday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="3"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-primary clear-time" data-clear-id="1"><?php echo $this->lang->line('xin_clear');?></button>
+            </div>
         </div>
-        <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_thursday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-4" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="thursday_in_time" type="text" value="<?php echo $thursday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-4" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="thursday_out_time" type="text" value="<?php echo $thursday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="4"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_friday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-5" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="friday_in_time" type="text" value="<?php echo $friday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-5" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="friday_out_time" type="text" value="<?php echo $friday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="5"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_saturday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-6" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="saturday_in_time" type="text" value="<?php echo $saturday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-6" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="saturday_out_time" type="text" value="<?php echo $saturday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="6"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="time" class="col-md-2"><?php echo $this->lang->line('xin_sunday');?></label>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-7" placeholder="<?php echo $this->lang->line('xin_in_time');?>" readonly="1" name="sunday_in_time" type="text" value="<?php echo $sunday_in_time;?>">
-          </div>
-          <div class="col-md-4">
-            <input class="form-control timepicker clear-7" placeholder="<?php echo $this->lang->line('xin_out_time');?>" readonly="1" name="sunday_out_time" type="text" value="<?php echo $sunday_out_time;?>">
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-primary clear-time" data-clear-id="7"><?php echo $this->lang->line('xin_clear');?></button>
-          </div>
-        </div>
-      </div>
+    </div>
     </div>
   </div>
   <div class="modal-footer">
