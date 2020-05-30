@@ -5359,15 +5359,19 @@ class Employees extends MY_Controller {
 		
 		$id = $this->uri->segment(4);
 		$other_payment = $this->Employees_model->set_employee_other_payments($id);
-		
+		$resultHrs = $this->Employees_model->read_employee_information($id);
 		$data = array();
 
         foreach($other_payment->result() as $r) {			
-		
+		$bonoDiario = $r->payments_amount/30;
+		$horasDia = $resultHrs[0]->horas_dia;
+		$bonoHora = $bonoDiario/$horasDia;
 		$data[] = array(
 			'<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_edit').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light" data-toggle="modal" data-target=".edit-modal-data" data-field_id="'. $r->other_payments_id . '" data-field_type="salary_other_payments"><span class="fa fa-pencil"></span></button></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $r->other_payments_id . '" data-token_type="all_other_payments"><span class="fa fa-trash"></span></button></span>',
 			$r->payments_title,
-			$r->payments_amount
+			$r->payments_amount,
+			$bonoDiario,
+			$bonoHora
 		);
       }
 

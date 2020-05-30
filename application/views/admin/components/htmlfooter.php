@@ -62,6 +62,23 @@ $(document).ready(function(){
 	toastr.options.positionClass = "<?php echo $system[0]->notification_position;?>";
    // setTimeout(refreshChatMsgs, 5000);
    $('[data-toggle="popover"]').popover();
+   $("#horas_dia").keyup(function(e) {
+      e.preventDefault();
+      var mensual = parseFloat($('#mensual_salary').val());
+      var horasDia = parseFloat($(this).val()); 
+      var dDiaria = mensual/30;
+      $('#diario_salary').val(dDiaria);
+      $('#basic_salary').val(dDiaria/horasDia);
+    });
+    
+    $("#amountBono").keyup(function(e) {
+      e.preventDefault();
+      var mensual = parseFloat($(this).val());
+      var horasDia = parseFloat($('#horas_dia').val());
+      var dDiaria = mensual/30;
+      $('#bono_diario').val(dDiaria);
+      $('#bono_hora').val(dDiaria/horasDia);
+    });
 });
 function escapeHtmlSecure(str)
 {

@@ -66,30 +66,40 @@ class Payroll extends MY_Controller {
 		}		  
      }
 	 
-	 // generate payslips
-	 public function generate_payslip()
-     {
-		$session = $this->session->userdata('username');
-		if(empty($session)){ 
+	// generate payslips
+	public function generate_payslip(){
+
+		$session = $this->session->userdata( 'username' );
+		
+		if( empty( $session ) ){
+
 			redirect('admin/');
 		}
+
 		$data['title'] = $this->lang->line('left_generate_payslip').' | '.$this->Xin_model->site_title();
 		$data['all_employees'] = $this->Xin_model->all_employees();
 		$data['all_companies'] = $this->Xin_model->get_companies();
 		$data['breadcrumbs'] = $this->lang->line('left_generate_payslip');
 		$data['path_url'] = 'generate_payslip';
 		$role_resources_ids = $this->Xin_model->user_role_resource();
-		if(in_array('36',$role_resources_ids)) {
-			if(!empty($session)){ 
+		
+		if( in_array( '36', $role_resources_ids ) ){
+			
+			if( !empty( $session ) ){
+
 				$data['subview'] = $this->load->view("admin/payroll/generate_payslip", $data, TRUE);
 				$this->load->view('admin/layout/layout_main', $data); //page load
-			} else {
+			}
+			else {
+				
 				redirect('admin/');
 			}
-		} else {
+		}
+		else {
+		
 			redirect('admin/dashboard');
 		}
-     }
+	}
 	 	 
 	 // payment history
 	 public function payment_history()
@@ -130,10 +140,6 @@ class Payroll extends MY_Controller {
 		$draw = intval($this->input->get("draw"));
 		$start = intval($this->input->get("start"));
 		$length = intval($this->input->get("length"));
-		
-		// date and employee id/company id
-		////$p_date = $this->input->get("month_year");
-
 
 		$p_fecha_inicial= $this->input->get("fecha_inicial");
 		$p_fecha_final= $this->input->get("fecha_final");
@@ -191,13 +197,10 @@ class Payroll extends MY_Controller {
 				
 				sscanf($re_str_time, "%d:%d:%d", $hours, $minutes, $seconds);
 				
-				$re_hrs_old_seconds = $hours * 3600 + $minutes * 60 + $seconds;
-				
+				$re_hrs_old_seconds = $hours * 3600 + $minutes * 60 + $seconds;				
 				$re_hrs_old_int1 += $re_hrs_old_seconds;
-				
-				//$re_pcount = gmdate("H", $re_hrs_old_int1);	
 				$re_pcount += $re_hours_r;		
-			}	
+			}
 			//$result2 = $this->Payroll_model->total_hours_worked($r->user_id,$pay_date);
 			$result = $this->Payroll_model->total_hours_worked2($r->user_id,$pay_fecha_inicial, $pay_fecha_final);
 			$hrs_old_int1 = 0;
@@ -206,27 +209,12 @@ class Payroll extends MY_Controller {
 			$total_time_rs = 0;
 			$hrs_old_int_res1 = 0;
 			foreach ($result->result() as $hour_work){
-				// total work			
-				$clock_in =  new DateTime($hour_work->clock_in);
-				$clock_out =  new DateTime($hour_work->clock_out);
-				$interval_late = $clock_in->diff($clock_out);
-				$hours_r  = $interval_late->format('%h');
-				$minutes_r = $interval_late->format('%i');			
-				$total_time = $hours_r .":".$minutes_r.":".'00';
 				
-				$str_time = $total_time;
-			
-				$str_time = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time);
+				$hourActive = explode( ":", $hour_work->total_work );	
 				
-				sscanf($str_time, "%d:%d:%d", $hours, $minutes, $seconds);
-				
-				$hrs_old_seconds = $hours * 3600 + $minutes * 60 + $seconds;
-				
-				$hrs_old_int1 += $hrs_old_seconds;
-				
-				//$pcount += gmdate("H", $hrs_old_int1);	
-				$pcount += $hours_r;
+				$pcount += $hourActive[0];
 			}
+
 			$pcount = $pcount + $re_pcount;
 				// get company
 				$company = $this->Xin_model->read_company_info($r->company_id);
@@ -384,7 +372,6 @@ class Payroll extends MY_Controller {
 					$statutory_deductions_amount = 0;
 				}				
 				
-				// 5: overtime
 				$salary_overtime = $this->Employees_model->read_salary_overtime($r->user_id);
 				$count_overtime = $this->Employees_model->count_employee_overtime($r->user_id);
 				$overtime_amount = 0;
@@ -403,36 +390,29 @@ class Payroll extends MY_Controller {
 							$eovertime_rate = $sl_overtime->overtime_rate;
 						}
 						$overtime_total = $eovertime_hours * $eovertime_rate;
-						//$overtime_total = $sl_overtime->overtime_hours * $sl_overtime->overtime_rate;
 						$overtime_amount += $overtime_total;
 					}
 				} else {
 					$overtime_amount = 0;
 				}
-				
-				
-				
-				//$allinfo = $basic_salary  .' - '.  $allowance_amount  .' - '.  $all_other_payment  .' - '.  $loan_de_amount  .' - '.  $overtime_amount  .' - '.  $statutory_deductions; // for testing purpose
-				// make payment
+
 				if($system[0]->is_half_monthly==1){
 					$payment_check = $this->Payroll_model->read_make_payment_payslip_half_month_check($r->user_id,$p_fecha_inicial, $p_fecha_final);
 					$payment_last = $this->Payroll_model->read_make_payment_payslip_half_month_check_last($r->user_id,$p_fecha_inicial, $p_fecha_final);
 					if($payment_check->num_rows() > 1) {
-						//foreach($payment_last as $payment_half_last){
-							$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial, $p_fecha_final);
-							$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
-							
-							$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
-							//$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_date="'. $p_date . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
-							$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
-							if(in_array('313',$role_resources_ids)){
-							$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
-							} else {
-								$delete = '';
-							}
-							$delete = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code><br>'.'<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $payment_last[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span><code>'.$this->lang->line('xin_title_second_half').'</code>';
-						//}
-						//detail link
+
+						$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial, $p_fecha_final);
+						$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
+						
+						$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
+						
+						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+						if(in_array('313',$role_resources_ids)){
+						$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
+						} else {
+							$delete = '';
+						}
+						$delete = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code><br>'.'<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $payment_last[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span><code>'.$this->lang->line('xin_title_second_half').'</code>';
 					$detail = '';
 					} else if($payment_check->num_rows() > 0){
 						$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial,$p_fecha_final);
@@ -482,15 +462,9 @@ class Payroll extends MY_Controller {
 				$total_earning = $basic_salary + $allowance_amount + $overtime_amount + $commissions_amount + $other_payments_amount;
 				$total_deduction = $loan_de_amount + $statutory_deductions_amount;
 				$total_net_salary = $total_earning - $total_deduction;
-				//if($r->salary_advance_paid == ''){
-				//$data1 = $add_salary. ' - ' .$loan_de_amount. ' - ' .$net_salary . ' - ' .$salary_ssempee . ' - ' .$statutory_deductions;
-				//$fnet_salary = $net_salary_default + $statutory_deductions;
-			//	$net_salary = $fnet_salary - $loan_de_amount;
-				$net_salary = number_format((float)$total_net_salary, 2, '.', '');
-				//$basic_salary_cal = $basic_salary * $current_rate; 
 				
+				$net_salary = number_format((float)$total_net_salary, 2, '.', '');
 				$basic_salary = number_format((float)$basic_salary, 2, '.', '');
-				//}
 				
 				if($basic_salary == 0 || $basic_salary == '') {
 					$fmpay = '';

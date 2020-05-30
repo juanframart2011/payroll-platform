@@ -1428,13 +1428,13 @@ $leave_user = $this->Xin_model->read_user_info($eid);
                             <div class="col-md-4">
                               <div class="form-group">
                               <label for="mensual_salary">Salario Mensual<i class="hrsale-asterisk">*</i></label>
-                                <input class="form-control mensual_salary" placeholder="Salario Mensual" name="mensual_salary" type="text" value="<?php echo $eresult[0]->mensual_salary;?>">
+                                <input class="form-control mensual_salary" placeholder="Salario Mensual" name="mensual_salary" id="mensual_salary" type="text" value="<?php echo $eresult[0]->mensual_salary;?>">
                               </div>
                             </div>
                             <div class="col-md-4">
                               <div class="form-group">
                               <label for="horas_dia">Horas Trabajadas por Día<i class="hrsale-asterisk">*</i></label>
-                                <input class="form-control horas_dia" placeholder="Horas por Día" name="horas_dia" type="text" value="<?php echo $eresult[0]->horas_dia;?>">
+                                <input class="form-control horas_dia" placeholder="Horas por Día" name="horas_dia" id="horas_dia" type="text" value="<?php echo $eresult[0]->horas_dia;?>">
                               </div>
                             </div>                           
                           </div>
@@ -1442,13 +1442,13 @@ $leave_user = $this->Xin_model->read_user_info($eid);
                             <div class="col-md-4">
                               <div class="form-group">
                               <label for="diario_salary">Salario Diario<i class="hrsale-asterisk">*</i></label>
-                                <input class="form-control diario_salary" placeholder="Salario Diario" name="diario_salary" type="text" value="<?php echo $salarioDiario;?>" readonly>
+                                <input class="form-control diario_salary" placeholder="Salario Diario" name="diario_salary" id="diario_salary" type="text" value="<?php echo $salarioDiario;?>" readonly>
                               </div>
                             </div>
                             <div class="col-md-4">
                               <div class="form-group">
                               <label for="basic_salary"><?php echo $this->lang->line('xin_salary_title'). " por Hora";?><i class="hrsale-asterisk">*</i></label>
-                                <input class="form-control basic_salary" placeholder="<?php echo $this->lang->line('xin_salary_title');?>" name="basic_salary" type="text" value="<?php echo $salarioHora;?>" readonly>
+                                <input class="form-control basic_salary" placeholder="<?php echo $this->lang->line('xin_salary_title');?>" name="basic_salary" id="basic_salary" type="text" value="<?php echo $salarioHora;?>" readonly>
                               </div>
                             </div>                          
                           </div>
@@ -1779,7 +1779,9 @@ $leave_user = $this->Xin_model->read_user_info($eid);
                                 <tr>
                                   <th><?php echo $this->lang->line('xin_action');?></th>
                                   <th><?php echo $this->lang->line('dashboard_xin_title');?></th>
-                                  <th><?php echo $this->lang->line('xin_amount');?></th>
+                                  <th>Mensual</th>
+                                  <th>Diario</th>
+                                  <th>Hora</th>
                                 </tr>
                               </thead>
                             </table>
@@ -1810,15 +1812,28 @@ $leave_user = $this->Xin_model->read_user_info($eid);
                           </div>
                           <div class="col-md-4">
                             <div class="form-group">
-                              <label for="amount"><?php echo $this->lang->line('xin_amount');?><i class="hrsale-asterisk">*</i></label>
-                              <input class="form-control" placeholder="<?php echo $this->lang->line('xin_amount');?>" name="amount" type="text" value="" id="amount">
+                              <label for="amount"><?php echo "Bono mensual";?><i class="hrsale-asterisk">*</i></label>
+                              <input class="form-control" placeholder="<?php echo $this->lang->line('xin_amount');?>" name="amount" type="text" value="" id="amountBono">
                             </div>
                           </div>
+                          <div class="col-md-4">
+                              <div class="form-group">
+                                <label for="bono_diario">Bono Diario<i class="hrsale-asterisk">*</i></label>
+                                <input class="form-control " placeholder="Bono diario" name="bono_diario" id="bono_diario" type="text" value="0" readonly>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="form-group">
+                                <label for="bono_hora">Bono Hora<i class="hrsale-asterisk">*</i></label>
+                                <input class="form-control " placeholder="Bono hora" name="bono_hora" id="bono_hora" type="text" value="0" readonly>
+                              </div>
+                            </div>
                           <div class="col-md-4">
                               <div class="form-group">
                               <div class="box-footer hrsale-salary-button"> <?php echo form_button(array('name' => 'hrsale_form', 'type' => 'submit', 'class' => $this->Xin_model->form_button_class(), 'content' => '<i class="fa fa fa-check-square-o"></i> '.$this->lang->line('xin_save'))); ?> </div>
                               </div>
                             </div>
+                            
                         </div>
                         <div class="row">
                           <div class="col-md-12">
