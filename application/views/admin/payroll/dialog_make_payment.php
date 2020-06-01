@@ -190,7 +190,6 @@ if($system[0]->is_half_monthly==1){
 ?>
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-  <!--<h4 class="modal-title" id="edit-modal-data"><strong><?php echo $this->lang->line('xin_payment_for');?></strong> <?php echo $half_title;?> <?php echo $p_month;?></h4>-->
 </div>
 <div class="modal-body" style="overflow:auto; height:530px;">
 <?php $attributes = array('name' => 'pay_monthly', 'id' => 'pay_monthly', 'autocomplete' => 'off', 'class'=>'m-b-1');?>
@@ -455,7 +454,7 @@ foreach ($result->result() as $hour_work){
 	$clock_in =  new DateTime($hour_work->clock_in);
 	$clock_out =  new DateTime($hour_work->clock_out);
 	$interval_late = $clock_in->diff($clock_out);
-	$hours_r  = $interval_late->format('%h');
+	$hours_r  = $hour_work->total_work;
 	$minutes_r = $interval_late->format('%i');			
 	$total_time = $hours_r .":".$minutes_r.":".'00';
 	
@@ -482,10 +481,6 @@ if($pcount > 0){
 $net_salary = $fsalary;
 $net_salary = number_format((float)$net_salary, 2, '.', '');
 ?>
-<div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
-  <h4 class="modal-title" id="edit-modal-data"><strong><?php echo $this->lang->line('xin_payment_for');?></strong> <?php echo $p_month;?></h4>
-</div>
 <div class="modal-body" style="overflow:auto; height:530px;">
 <?php $attributes = array('name' => 'pay_hourly', 'id' => 'pay_hourly', 'autocomplete' => 'off', 'class'=>'m-b-1');?>
 <?php $hidden = array('_method' => 'ADD');?>

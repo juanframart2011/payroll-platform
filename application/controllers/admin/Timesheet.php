@@ -1396,7 +1396,7 @@ class Timesheet extends MY_Controller {
 				$hrs_old_int_res1 = '';
 				foreach ($total_hrs->result() as $hour_work){		
 					// total work			
-					$timee = $hour_work->total_work.':00';
+					$timee = $hour_work->total_work;
 					$str_time =$timee;
 		
 					$str_time = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time);
@@ -1410,7 +1410,7 @@ class Timesheet extends MY_Controller {
 					$Total = gmdate("H:i", $hrs_old_int1);	
 				}
 				if($Total=='') {
-					$total_work = '00:00';
+					$total_work = '00';
 				} else {
 					$total_work = $Total;
 				}
@@ -1444,7 +1444,7 @@ class Timesheet extends MY_Controller {
 			} else {
 				$clock_in2 = '-';
 				$total_time_l = '00:00';
-				$total_work = '00:00';
+				$total_work = '00';
 				$Trest = '00:00';
 				$clkInIp = $clock_in2;
 				// get holiday/leave or absent
@@ -1967,7 +1967,7 @@ class Timesheet extends MY_Controller {
 			$hrs_old_int_res1 = 0;
 			foreach ($total_hrs->result() as $hour_work){		
 				// total work			
-				$timee = $hour_work->total_work.':00';
+				$timee = $hour_work->total_work;
 				$str_time =$timee;
 	
 				$str_time = preg_replace("/^([\d]{1,2})\:([\d]{2})$/", "00:$1:$2", $str_time);
@@ -1981,7 +1981,7 @@ class Timesheet extends MY_Controller {
 				$Total = gmdate("H:i", $hrs_old_int1);	
 			}
 			if($Total=='') {
-				$total_work = '00:00';
+				$total_work = '00';
 			} else {
 				$total_work = $Total;
 			}
@@ -2015,7 +2015,7 @@ class Timesheet extends MY_Controller {
 		} else {
 			$clock_in2 = '-';
 			$total_time_l = '00:00';
-			$total_work = '00:00';
+			$total_work = '00';
 			$Trest = '00:00';
 			$clkInIp = $clock_in2;
 			// get holiday/leave or absent
@@ -3018,8 +3018,8 @@ class Timesheet extends MY_Controller {
 
 			for( $hr = 0; $hr < count( $horarioResult ); $hr++ ){
 
-				$hourActive = explode( ":", $horarioResult[$hr]->total_work );
-				$sumHoras = $sumHoras + $hourActive[0];
+				$hourActive = $horarioResult[$hr]->total_work;
+				$sumHoras = $sumHoras + $hourActive;
 			}
 		}
 
@@ -3033,7 +3033,7 @@ class Timesheet extends MY_Controller {
        		$this->output($Return);
     	}
 
-		$total_work = $turnoHora .":00";
+		$total_work = $turnoHora;
 	
 		$data = array(
 			'employee_id' => $emp_id,
@@ -3688,8 +3688,8 @@ class Timesheet extends MY_Controller {
 
 				if( $turnoCurrent != $horarioResult[$hr]->office_shift_id ){
 
-					$hourActive = explode( ":", $horarioResult[$hr]->total_work );
-					$sumHoras = $sumHoras + $hourActive[0];
+					$hourActive = $horarioResult[$hr]->total_work;
+					$sumHoras = $sumHoras + $hourActive;
 				}
 			}
 		}
@@ -3703,7 +3703,7 @@ class Timesheet extends MY_Controller {
        		$this->output($Return);
     	}
 		
-		$total_work = $turnoHora .":00";
+		$total_work = $turnoHora;
 	
 		$data = array(
 		'employee_id' => $this->input->post('emp_att'),
@@ -4046,7 +4046,7 @@ class Timesheet extends MY_Controller {
 						$interval_cin = $total_work_cout->diff($total_work_cin);
 						$hours_in   = $interval_cin->format('%h');
 						$minutes_in = $interval_cin->format('%i');
-						$total_work = $hours_in .":".$minutes_in;
+						$total_work = $hours_in;
 						
 						$data = array(
 							'employee_id' => $employee_id,

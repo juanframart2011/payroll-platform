@@ -143,12 +143,17 @@ class Payroll extends MY_Controller {
 
 		$p_fecha_inicial= $this->input->get("fecha_inicial");
 		$p_fecha_final= $this->input->get("fecha_final");
-		
 
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$user_info = $this->Xin_model->read_user_info($session['user_id']);
+		$empleadoId = $user_info[0]->user_id;
 
-		$diasTrabajados2 = $this->Employees_model->get_dias_trabajados($user_info[0]->user_id, $p_fecha_inicial, $p_fecha_final);
+		if( !empty( $this->input->get( "employee_id" ) ) ){
+
+			$empleadoId = $this->input->get( "employee_id" );
+		}		
+
+		//$diasTrabajados2 = $this->Employees_model->get_dias_trabajados( $empleadoId, $p_fecha_inicial, $p_fecha_final);
 		
 		if($user_info[0]->user_role_id==1 || in_array('314',$role_resources_ids)){
 			if($this->input->get("employee_id")==0 && $this->input->get("company_id")==0) {
@@ -160,23 +165,30 @@ class Payroll extends MY_Controller {
 			} else {
 				$payslip = $this->Employees_model->get_employees_payslip();
 			}
-		} else {
-			$payslip = $this->Payroll_model->get_employee_comp_template($user_info[0]->company_id,$session['user_id']);
+		}
+		else {
+			if( $empleadoId == 0 ){
+
+				$payslip = $this->Payroll_model->get_employee_comp_template_all($user_info[0]->company_id);
+			}
+			else{
+
+				$payslip = $this->Payroll_model->get_employee_comp_template($user_info[0]->company_id,$session['user_id']);
+			}
 		}
 		$system = $this->Xin_model->read_setting_info(1);		
 		$data = array();
 
         foreach($payslip->result() as $r) {
-			  // user full name
+
+        	$diasTrabajados2 = $this->Employees_model->get_dias_trabajados( $r->user_id, $p_fecha_inicial, $p_fecha_final);
+
 			$emp_name = $r->first_name.' '.$r->last_name;
 			$full_name = '<a target="_blank" class="text-primary" href="'.site_url().'admin/employees/detail/'.$r->user_id.'">'.$emp_name.'</a>';
-			
-			// get total hours > worked > employee
-			////$pay_date = $this->input->get('month_year');
+
 			$pay_fecha_inicial = $this->input->get('fecha_inicial');
 			$pay_fecha_final = $this->input->get('fecha_final');
-			//overtime request
-			////$overtime_count2 = $this->Overtime_request_model->get_overtime_request_count($r->user_id,$this->input->get('month_year'));
+			
 			$overtime_count = $this->Overtime_request_model->get_overtime_request_count2($r->user_id,$this->input->get('fecha_inicial'),$this->input->get('fecha_final'));
 
 			$re_hrs_old_int1 = 0;
@@ -210,294 +222,294 @@ class Payroll extends MY_Controller {
 			$hrs_old_int_res1 = 0;
 			foreach ($result->result() as $hour_work){
 				
-				$hourActive = explode( ":", $hour_work->total_work );	
+				$hourActive = $hour_work->total_work;	
 				
-				$pcount += $hourActive[0];
+				$pcount += $hourActive;
 			}
 
 			$pcount = $pcount + $re_pcount;
-				// get company
-				$company = $this->Xin_model->read_company_info($r->company_id);
-				if(!is_null($company)){
-					$comp_name = $company[0]->name;
+			// get company
+			$company = $this->Xin_model->read_company_info($r->company_id);
+			if(!is_null($company)){
+				$comp_name = $company[0]->name;
+			} else {
+				$comp_name = '--';	
+			}
+			
+			// 1: salary type
+			if($r->wages_type==1){
+				$wages_type = $this->lang->line('xin_payroll_basic_salary');
+				if($system[0]->is_half_monthly==1){
+					$basic_salary = $r->basic_salary;
 				} else {
-					$comp_name = '--';	
+					$basic_salary = $r->basic_salary;
 				}
-				
-				// 1: salary type
-				if($r->wages_type==1){
-					$wages_type = $this->lang->line('xin_payroll_basic_salary');
-					if($system[0]->is_half_monthly==1){
-						$basic_salary = $r->basic_salary;
-					} else {
-						$basic_salary = $r->basic_salary;
-					}
-					$p_class = 'emo_monthly_pay';
-					$view_p_class = 'payroll_template_modal';
-				} else if($r->wages_type==2){
-					$wages_type = $this->lang->line('xin_employee_daily_wages');
-					if($pcount > 0){
-						$basic_salary = $pcount * $r->basic_salary;
-					} else {
-						$basic_salary = $pcount;
-					}
-					$p_class = 'emo_hourly_pay';
-					$view_p_class = 'hourlywages_template_modal';
+				$p_class = 'emo_monthly_pay';
+				$view_p_class = 'payroll_template_modal';
+			} else if($r->wages_type==2){
+				$wages_type = $this->lang->line('xin_employee_daily_wages');
+				if($pcount > 0){
+					$basic_salary = $pcount * $r->basic_salary;
 				} else {
-					$wages_type = $this->lang->line('xin_payroll_basic_salary');
+					$basic_salary = $pcount;
+				}
+				$p_class = 'emo_hourly_pay';
+				$view_p_class = 'hourlywages_template_modal';
+			} else {
+				$wages_type = $this->lang->line('xin_payroll_basic_salary');
+				if($system[0]->is_half_monthly==1){
+					$basic_salary = $r->basic_salary ;
+				} else {
+					$basic_salary = $r->basic_salary;
+				}
+				$p_class = 'emo_monthly_pay';
+				$view_p_class = 'payroll_template_modal';
+				
+			}				
+			// 2: all allowances
+			$salary_allowances = $this->Employees_model->read_salary_allowances($r->user_id);
+			$count_allowances = $this->Employees_model->count_employee_allowances($r->user_id);
+			$allowance_amount = 0;
+			if($count_allowances > 0) {
+				foreach($salary_allowances as $sl_allowances){
 					if($system[0]->is_half_monthly==1){
-						$basic_salary = $r->basic_salary ;
-					} else {
-						$basic_salary = $r->basic_salary;
-					}
-					$p_class = 'emo_monthly_pay';
-					$view_p_class = 'payroll_template_modal';
-					
-				}				
-				// 2: all allowances
-				$salary_allowances = $this->Employees_model->read_salary_allowances($r->user_id);
-				$count_allowances = $this->Employees_model->count_employee_allowances($r->user_id);
+				  	 if($system[0]->half_deduct_month==2){
+						 $eallowance_amount = $sl_allowances->allowance_amount;
+					 } else {
+						 $eallowance_amount = $sl_allowances->allowance_amount;
+					 }
+                  } else {
+					  $eallowance_amount = $sl_allowances->allowance_amount;
+                  }
+				  $allowance_amount += $eallowance_amount;
+				}
+			} else {
 				$allowance_amount = 0;
-				if($count_allowances > 0) {
-					foreach($salary_allowances as $sl_allowances){
-						if($system[0]->is_half_monthly==1){
-					  	 if($system[0]->half_deduct_month==2){
-							 $eallowance_amount = $sl_allowances->allowance_amount;
-						 } else {
-							 $eallowance_amount = $sl_allowances->allowance_amount;
-						 }
-                      } else {
-						  $eallowance_amount = $sl_allowances->allowance_amount;
-                      }
-					  $allowance_amount += $eallowance_amount;
-					}
-				} else {
-					$allowance_amount = 0;
-				}
-				
-				// 3: all loan/deductions
-				$salary_loan_deduction = $this->Employees_model->read_salary_loan_deductions($r->user_id);
-				$count_loan_deduction = $this->Employees_model->count_employee_deductions($r->user_id);
-				$loan_de_amount = 0;
-				if($count_loan_deduction > 0) {
-					foreach($salary_loan_deduction as $sl_salary_loan_deduction){
-						if($system[0]->is_half_monthly==1){
-					  	  if($system[0]->half_deduct_month==2){
-							  $er_loan = $sl_salary_loan_deduction->loan_deduction_amount;
-						  } else {
-							  $er_loan = $sl_salary_loan_deduction->loan_deduction_amount;
-						  }
-                      } else {
+			}
+			
+			// 3: all loan/deductions
+			$salary_loan_deduction = $this->Employees_model->read_salary_loan_deductions($r->user_id);
+			$count_loan_deduction = $this->Employees_model->count_employee_deductions($r->user_id);
+			$loan_de_amount = 0;
+			if($count_loan_deduction > 0) {
+				foreach($salary_loan_deduction as $sl_salary_loan_deduction){
+					if($system[0]->is_half_monthly==1){
+				  	  if($system[0]->half_deduct_month==2){
 						  $er_loan = $sl_salary_loan_deduction->loan_deduction_amount;
-                      }
-					  $loan_de_amount += $er_loan;
-					}
-				} else {
-					$loan_de_amount = 0;
+					  } else {
+						  $er_loan = $sl_salary_loan_deduction->loan_deduction_amount;
+					  }
+                  } else {
+					  $er_loan = $sl_salary_loan_deduction->loan_deduction_amount;
+                  }
+				  $loan_de_amount += $er_loan;
 				}
-				
-				// commissions
-				$count_commissions = $this->Employees_model->count_employee_commissions($r->user_id);
-				$commissions = $this->Employees_model->set_employee_commissions($r->user_id);
-				$commissions_amount = 0;
-				if($count_commissions > 0) {
-					foreach($commissions->result() as $sl_salary_commissions){
-						if($system[0]->is_half_monthly==1){
-					  	  if($system[0]->half_deduct_month==2){
-							  $ecommissions_amount = $sl_salary_commissions->commission_amount;
-						  } else {
-							  $ecommissions_amount = $sl_salary_commissions->commission_amount;
-						  }
-                      } else {
+			} else {
+				$loan_de_amount = 0;
+			}
+			
+			// commissions
+			$count_commissions = $this->Employees_model->count_employee_commissions($r->user_id);
+			$commissions = $this->Employees_model->set_employee_commissions($r->user_id);
+			$commissions_amount = 0;
+			if($count_commissions > 0) {
+				foreach($commissions->result() as $sl_salary_commissions){
+					if($system[0]->is_half_monthly==1){
+				  	  if($system[0]->half_deduct_month==2){
 						  $ecommissions_amount = $sl_salary_commissions->commission_amount;
-                      }
-					  $commissions_amount += $ecommissions_amount;
-					}
-				} else {
-					$commissions_amount = 0;
+					  } else {
+						  $ecommissions_amount = $sl_salary_commissions->commission_amount;
+					  }
+                  } else {
+					  $ecommissions_amount = $sl_salary_commissions->commission_amount;
+                  }
+				  $commissions_amount += $ecommissions_amount;
 				}
-				// otherpayments
-				$count_other_payments = $this->Employees_model->count_employee_other_payments($r->user_id);
-				$other_payments = $this->Employees_model->set_employee_other_payments($r->user_id);
-				$other_payments_amount = 0;
-				if($count_other_payments > 0) {
-					foreach($other_payments->result() as $sl_other_payments) {
-						if($system[0]->is_half_monthly==1){
-					  	  if($system[0]->half_deduct_month==2){
-							  $epayments_amount = $sl_other_payments->payments_amount;
-						  } else {
-							  $epayments_amount = $sl_other_payments->payments_amount;
-						  }
-                      } else {
+			} else {
+				$commissions_amount = 0;
+			}
+			// otherpayments
+			$count_other_payments = $this->Employees_model->count_employee_other_payments($r->user_id);
+			$other_payments = $this->Employees_model->set_employee_other_payments($r->user_id);
+			$other_payments_amount = 0;
+			if($count_other_payments > 0) {
+				foreach($other_payments->result() as $sl_other_payments) {
+					if($system[0]->is_half_monthly==1){
+				  	  if($system[0]->half_deduct_month==2){
 						  $epayments_amount = $sl_other_payments->payments_amount;
-                      }
-					  $other_payments_amount += $epayments_amount;
-					}
-				} else {
-					$other_payments_amount = 0;
+					  } else {
+						  $epayments_amount = $sl_other_payments->payments_amount;
+					  }
+                  } else {
+					  $epayments_amount = $sl_other_payments->payments_amount;
+                  }
+				  $other_payments_amount += $epayments_amount;
 				}
-				// statutory_deductions
-				$count_statutory_deductions = $this->Employees_model->count_employee_statutory_deductions($r->user_id);
-				$statutory_deductions = $this->Employees_model->set_employee_statutory_deductions($r->user_id);
-				$statutory_deductions_amount = 0;
-				if($count_statutory_deductions > 0) {
-					foreach($statutory_deductions->result() as $sl_salary_statutory_deductions){
-						if($system[0]->statutory_fixed!='yes'):
-							$sta_salary = $basic_salary;
-							$st_amount = $sl_salary_statutory_deductions->deduction_amount;
-							if($system[0]->is_half_monthly==1){
-								   if($system[0]->half_deduct_month==2){
-									   $single_sd = $st_amount;
-								   } else {
-									   $single_sd = $st_amount;
-								   }
-							  } else {
-								  $single_sd = $st_amount;
-							  }
-							  $statutory_deductions_amount += $single_sd;
-						else:
-							if($system[0]->is_half_monthly==1){
-								  if($system[0]->half_deduct_month==2){
-									  $single_sd = $sl_salary_statutory_deductions->deduction_amount;
-								  } else {
-									   $single_sd = $sl_salary_statutory_deductions->deduction_amount;
-								  }
-							  } else {
-								  $single_sd = $sl_salary_statutory_deductions->deduction_amount;
-							  }
-							  $statutory_deductions_amount += $single_sd;
-						endif;
-					}
-				} else {
-					$statutory_deductions_amount = 0;
-				}				
-				
-				$salary_overtime = $this->Employees_model->read_salary_overtime($r->user_id);
-				$count_overtime = $this->Employees_model->count_employee_overtime($r->user_id);
-				$overtime_amount = 0;
-				if($count_overtime > 0) {
-					foreach($salary_overtime as $sl_overtime){
+			} else {
+				$other_payments_amount = 0;
+			}
+			// statutory_deductions
+			$count_statutory_deductions = $this->Employees_model->count_employee_statutory_deductions($r->user_id);
+			$statutory_deductions = $this->Employees_model->set_employee_statutory_deductions($r->user_id);
+			$statutory_deductions_amount = 0;
+			if($count_statutory_deductions > 0) {
+				foreach($statutory_deductions->result() as $sl_salary_statutory_deductions){
+					if($system[0]->statutory_fixed!='yes'):
+						$sta_salary = $basic_salary;
+						$st_amount = $sl_salary_statutory_deductions->deduction_amount;
 						if($system[0]->is_half_monthly==1){
-							if($system[0]->half_deduct_month==2){
-								$eovertime_hours = $sl_overtime->overtime_hours;
-								$eovertime_rate = $sl_overtime->overtime_rate;
-							} else {
-								$eovertime_hours = $sl_overtime->overtime_hours;
-								$eovertime_rate = $sl_overtime->overtime_rate;
-							}
+							   if($system[0]->half_deduct_month==2){
+								   $single_sd = $st_amount;
+							   } else {
+								   $single_sd = $st_amount;
+							   }
+						  } else {
+							  $single_sd = $st_amount;
+						  }
+						  $statutory_deductions_amount += $single_sd;
+					else:
+						if($system[0]->is_half_monthly==1){
+							  if($system[0]->half_deduct_month==2){
+								  $single_sd = $sl_salary_statutory_deductions->deduction_amount;
+							  } else {
+								   $single_sd = $sl_salary_statutory_deductions->deduction_amount;
+							  }
+						  } else {
+							  $single_sd = $sl_salary_statutory_deductions->deduction_amount;
+						  }
+						  $statutory_deductions_amount += $single_sd;
+					endif;
+				}
+			} else {
+				$statutory_deductions_amount = 0;
+			}				
+			
+			$salary_overtime = $this->Employees_model->read_salary_overtime($r->user_id);
+			$count_overtime = $this->Employees_model->count_employee_overtime($r->user_id);
+			$overtime_amount = 0;
+			if($count_overtime > 0) {
+				foreach($salary_overtime as $sl_overtime){
+					if($system[0]->is_half_monthly==1){
+						if($system[0]->half_deduct_month==2){
+							$eovertime_hours = $sl_overtime->overtime_hours;
+							$eovertime_rate = $sl_overtime->overtime_rate;
 						} else {
 							$eovertime_hours = $sl_overtime->overtime_hours;
 							$eovertime_rate = $sl_overtime->overtime_rate;
 						}
-						$overtime_total = $eovertime_hours * $eovertime_rate;
-						$overtime_amount += $overtime_total;
+					} else {
+						$eovertime_hours = $sl_overtime->overtime_hours;
+						$eovertime_rate = $sl_overtime->overtime_rate;
 					}
-				} else {
-					$overtime_amount = 0;
+					$overtime_total = $eovertime_hours * $eovertime_rate;
+					$overtime_amount += $overtime_total;
 				}
+			} else {
+				$overtime_amount = 0;
+			}
 
-				if($system[0]->is_half_monthly==1){
-					$payment_check = $this->Payroll_model->read_make_payment_payslip_half_month_check($r->user_id,$p_fecha_inicial, $p_fecha_final);
-					$payment_last = $this->Payroll_model->read_make_payment_payslip_half_month_check_last($r->user_id,$p_fecha_inicial, $p_fecha_final);
-					if($payment_check->num_rows() > 1) {
+			if($system[0]->is_half_monthly==1){
+				$payment_check = $this->Payroll_model->read_make_payment_payslip_half_month_check($r->user_id,$p_fecha_inicial, $p_fecha_final);
+				$payment_last = $this->Payroll_model->read_make_payment_payslip_half_month_check_last($r->user_id,$p_fecha_inicial, $p_fecha_final);
+				if($payment_check->num_rows() > 1) {
 
-						$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial, $p_fecha_final);
-						$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
-						
-						$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
-						
-						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
-						if(in_array('313',$role_resources_ids)){
-						$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
-						} else {
-							$delete = '';
-						}
-						$delete = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code><br>'.'<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $payment_last[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span><code>'.$this->lang->line('xin_title_second_half').'</code>';
+					$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial, $p_fecha_final);
+					$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
+					
+					$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
+					
+					$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+					if(in_array('313',$role_resources_ids)){
+					$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
+					} else {
+						$delete = '';
+					}
+					$delete = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code><br>'.'<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$payment_last[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $payment_last[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span><code>'.$this->lang->line('xin_title_second_half').'</code>';
+				$detail = '';
+				} else if($payment_check->num_rows() > 0){
+					$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial,$p_fecha_final);
+					$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
+					
+					$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
+					$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
+					$mpay .= '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+					if(in_array('313',$role_resources_ids)){
+					$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
+					} else {
+						$delete = '';
+					}
+					$delete  = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code>';
 					$detail = '';
-					} else if($payment_check->num_rows() > 0){
-						$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial,$p_fecha_final);
-						$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
-						
-						$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
-						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
-						$mpay .= '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
-						if(in_array('313',$role_resources_ids)){
-						$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
-						} else {
-							$delete = '';
-						}
-						$delete  = $delete.'<code>'.$this->lang->line('xin_title_first_half').'</code>';
-						$detail = '';
-					} else {
-						$status = '<span class="label label-danger">'.$this->lang->line('xin_payroll_unpaid').'</span>';
-						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
-						$delete = '';
-						//detail link
-					$detail = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$view_p_class.'" data-employee_id="'. $r->user_id . '"><span class="fa fa-eye"></span></button></span>';
-					}
-					//detail link
-					//$detail = '';
 				} else {
-					$payment_check = $this->Payroll_model->read_make_payment_payslip_check($r->user_id,$p_fecha_inicial,$p_fecha_final);
-					if($payment_check->num_rows() > 0){
-						$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial,$p_fecha_final);
-						$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
-						
-						$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
-						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
-						if(in_array('313',$role_resources_ids)){
-						$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
-						} else {
-							$delete = '';
-						}
-					} else {
-						$status = '<span class="label label-danger">'.$this->lang->line('xin_payroll_unpaid').'</span>';
-						$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
-						$delete = '';
-					}
+					$status = '<span class="label label-danger">'.$this->lang->line('xin_payroll_unpaid').'</span>';
+					$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
+					$delete = '';
 					//detail link
 				$detail = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$view_p_class.'" data-employee_id="'. $r->user_id . '"><span class="fa fa-eye"></span></button></span>';
 				}
-				// add amount				
-				$total_earning = $basic_salary + $allowance_amount + $overtime_amount + $commissions_amount + $other_payments_amount;
-				$total_deduction = $loan_de_amount + $statutory_deductions_amount;
-				$total_net_salary = $total_earning - $total_deduction;
-				
-				$net_salary = number_format((float)$total_net_salary, 2, '.', '');
-				$basic_salary = number_format((float)$basic_salary, 2, '.', '');
-				
-				if($basic_salary == 0 || $basic_salary == '') {
-					$fmpay = '';
-				} else {
-					$fmpay = $mpay;
-				}
-				$basic_salary = $this->Xin_model->currency_sign($basic_salary);
+				//detail link
+				//$detail = '';
+			} else {
+				$payment_check = $this->Payroll_model->read_make_payment_payslip_check($r->user_id,$p_fecha_inicial,$p_fecha_final);
+				if($payment_check->num_rows() > 0){
+					$make_payment = $this->Payroll_model->read_make_payment_payslip($r->user_id,$p_fecha_inicial,$p_fecha_final);
+					$view_url = site_url().'admin/payroll/payslip/id/'.$make_payment[0]->payslip_key;
 					
-				$net_salary = $this->Xin_model->currency_sign($net_salary);
-				
-				$iemp_name = $emp_name.'<small class="text-muted"><i> ('.$comp_name.')<i></i></i></small><br><small class="text-muted"><i>'.$this->lang->line('xin_employees_id').': '.$r->employee_id.'<i></i></i></small>';
-				
-				//action link
-				$act = $detail.$fmpay.$delete;
-				if($r->wages_type==1){
-					if($system[0]->is_half_monthly==1){
-						$emp_payroll_wage = $wages_type.'<br><small class="text-muted"><i>'.$this->lang->line('xin_half_monthly').'<i></i></i></small>';
+					$status = '<span class="label label-success">'.$this->lang->line('xin_payroll_paid').'</span>';
+					$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_view_payslip').'"><a href="'.$view_url.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$make_payment[0]->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+					if(in_array('313',$role_resources_ids)){
+					$delete = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_delete').'"><button type="button" class="btn icon-btn btn-xs btn-danger waves-effect waves-light delete" data-toggle="modal" data-target=".delete-modal" data-record-id="'. $make_payment[0]->payslip_id . '"><span class="fa fa-trash"></span></button></span>';
 					} else {
-						$emp_payroll_wage = $wages_type;
+						$delete = '';
 					}
-				}else {
+				} else {
+					$status = '<span class="label label-danger">'.$this->lang->line('xin_payroll_unpaid').'</span>';
+					$mpay = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_payroll_make_payment').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$p_class.'" data-employee_id="'. $r->user_id . '" data-payment_inicial="'. $p_fecha_inicial . '" data-payment_final="'. $p_fecha_final . '" data-company_id="'.$this->input->get("company_id").'"><span class="fa fas fa-money"></span></button></span>';
+					$delete = '';
+				}
+				//detail link
+			$detail = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><button type="button" class="btn icon-btn btn-xs btn-outline-secondary waves-effect waves-light" data-toggle="modal" data-target=".'.$view_p_class.'" data-employee_id="'. $r->user_id . '"><span class="fa fa-eye"></span></button></span>';
+			}
+			// add amount				
+			$total_earning = $basic_salary + $allowance_amount + $overtime_amount + $commissions_amount + $other_payments_amount;
+			$total_deduction = $loan_de_amount + $statutory_deductions_amount;
+			$total_net_salary = $total_earning - $total_deduction;
+			
+			$net_salary = number_format((float)$total_net_salary, 2, '.', '');
+			$basic_salary = number_format((float)$basic_salary, 2, '.', '');
+			
+			if($basic_salary == 0 || $basic_salary == '') {
+				$fmpay = '';
+			} else {
+				$fmpay = $mpay;
+			}
+			$basic_salary = $this->Xin_model->currency_sign($basic_salary);
+				
+			$net_salary = $this->Xin_model->currency_sign($net_salary);
+			
+			$iemp_name = $emp_name.'<small class="text-muted"><i> ('.$comp_name.')<i></i></i></small><br><small class="text-muted"><i>'.$this->lang->line('xin_employees_id').': '.$r->employee_id.'<i></i></i></small>';
+			
+			//action link
+			$act = $detail.$fmpay.$delete;
+			if($r->wages_type==1){
+				if($system[0]->is_half_monthly==1){
+					$emp_payroll_wage = $wages_type.'<br><small class="text-muted"><i>'.$this->lang->line('xin_half_monthly').'<i></i></i></small>';
+				} else {
 					$emp_payroll_wage = $wages_type;
 				}
-				
-				$data[] = array(
-					$act,
-					$iemp_name,
-					$emp_payroll_wage,
-					$basic_salary,
-					$net_salary,
-					$diasTrabajados2,
-					$status
-				);
+			}else {
+				$emp_payroll_wage = $wages_type;
+			}
+			
+			$data[] = array(
+				$act,
+				$iemp_name,
+				$emp_payroll_wage,
+				$basic_salary,
+				$net_salary,
+				$diasTrabajados2,
+				$status
+			);
           }
 
           $output = array(
@@ -1756,9 +1768,7 @@ class Payroll extends MY_Controller {
 					$history = $this->Payroll_model->get_company_location_department_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"),$this->input->get("salary_month"));
 				}
 				
-			}/**/ /*else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")!=0 && $this->input->get("designation_id")!=0){
-				$history = $this->Payroll_model->get_company_location_department_designation_payslips($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"),$this->input->get("designation_id"));
-			}*/
+			}
 		} else {
 			if($user_info[0]->user_role_id==1 || $user_info[0]->user_role_id==3){
 				$history = $this->Payroll_model->employees_payment_history();
@@ -1772,7 +1782,7 @@ class Payroll extends MY_Controller {
 		}
 		$data = array();
 
-          foreach($history->result() as $r) {
+		foreach($history->result() as $r) {
 
 			// get addd by > template
 			$user = $this->Xin_model->read_user_info($r->employee_id);
@@ -1818,10 +1828,10 @@ class Payroll extends MY_Controller {
 			} else {
 				$account_number = '--';	
 			}
-			$diasTrabajados = $this->Employees_model->get_dias_trabajados($user[0]->user_id, $fecha_inicialR, $fecha_finalR);
+			$diasTrabajados = $this->Employees_model->get_dias_trabajados( $r->employee_id, $fecha_inicialR, $fecha_finalR);
 			$payslip = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$r->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$r->payslip_key.'?fecha_inicial='.$fecha_inicialR.'&fecha_final='.$fecha_finalR.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
 			
-		$ifull_name = nl2br ($full_name."\r\n <small class='text-muted'><i>".$this->lang->line('xin_employees_id').': '.$emp_link."<i></i></i></small>\r\n <small class='text-muted'><i>".$department_designation.'<i></i></i></small>');
+			$ifull_name = nl2br ($full_name."\r\n <small class='text-muted'><i>".$this->lang->line('xin_employees_id').': '.$emp_link."<i></i></i></small>\r\n <small class='text-muted'><i>".$department_designation.'<i></i></i></small>');
                $data[] = array(
 					$payslip,
                     $full_name,

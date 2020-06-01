@@ -30,6 +30,14 @@
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
+
+	public function get_employee_comp_template_all($cid) {
+		
+		$sql = 'SELECT * FROM xin_employees WHERE company_id = ?';
+		$binds = array( $cid );
+		$query = $this->db->query($sql, $binds);
+		return $query;
+	}
 	
 	// get total hours work > hourly template > payroll generate
 	public function total_hours_worked($id,$attendance_date) {

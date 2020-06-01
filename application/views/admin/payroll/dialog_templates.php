@@ -82,11 +82,8 @@ if($profile_picture!='' && $profile_picture!='no file') {
                 <div class="table-responsive" data-pattern="priority-columns">
                 <?php
 				if($system[0]->is_half_monthly==1){
-					//if($half_deduct_month==2){
+
 						$basic_salary = $basic_salary / 2;
-					//} else {
-						//$basic_salary = $basic_salary;
-					//}
 				} else {
 					$basic_salary = $basic_salary;
 				}
@@ -444,11 +441,11 @@ if($profile_picture!='' && $profile_picture!='no file') {
                       </tr>
                         <?php
 						$pay_date = $_GET['pay_date'];
-            $pay_fecha_inicial = $_GET['fecha_inicial'];
-            $pay_fecha_final = $_GET['fecha_final'];
+                        $pay_fecha_inicial = $_GET['fecha_inicial'];
+                        $pay_fecha_final = $_GET['fecha_final'];
 						//overtime request
 						//$overtime_count = $this->Overtime_request_model->get_overtime_request_count($euser_id,$pay_date);
-            $overtime_count = $this->Overtime_request_model->get_overtime_request_count2($euser_id,$pay_fecha_inicial,$pay_fecha_final);
+                        $overtime_count = $this->Overtime_request_model->get_overtime_request_count2($euser_id,$pay_fecha_inicial,$pay_fecha_final);
 						$re_hrs_old_int1 = 0;
 						$re_hrs_old_seconds =0;
 						$re_pcount = 0;
@@ -472,11 +469,10 @@ if($profile_picture!='' && $profile_picture!='no file') {
 							$re_hrs_old_int1 += $re_hrs_old_seconds;
 							
 							//$re_pcount = gmdate("H", $re_hrs_old_int1);	
-              $re_pcount += $re_hours_r;  
-
+                            $re_pcount += $re_hours_r;  
 						}
 						//$result = $this->Payroll_model->total_hours_worked($euser_id,$pay_date);
-            $result = $this->Payroll_model->total_hours_worked2($euser_id,$pay_fecha_inicial,$pay_fecha_final);
+                        $result = $this->Payroll_model->total_hours_worked2($euser_id,$pay_fecha_inicial,$pay_fecha_final);
 						$hrs_old_int1 = 0;
 						$pcount = 0;
 						$Trest = 0;
@@ -487,7 +483,7 @@ if($profile_picture!='' && $profile_picture!='no file') {
 							$clock_in =  new DateTime($hour_work->clock_in);
 							$clock_out =  new DateTime($hour_work->clock_out);
 							$interval_late = $clock_in->diff($clock_out);
-							$hours_r  = $interval_late->format('%h');
+							$hours_r  = $hour_work->total_work;
 							$minutes_r = $interval_late->format('%i');			
 							$total_time = $hours_r .":".$minutes_r.":".'00';
 							
@@ -501,8 +497,7 @@ if($profile_picture!='' && $profile_picture!='no file') {
 							
 							$hrs_old_int1 += $hrs_old_seconds;
 							
-							//$pcount = gmdate("H", $hrs_old_int1);	
-              $pcount += $hours_r;		
+							$pcount += $hours_r;		
 						}
 						$pcount = $pcount + $re_pcount;
 						?>

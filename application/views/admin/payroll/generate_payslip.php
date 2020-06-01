@@ -68,6 +68,12 @@ if($system[0]->is_half_monthly==1){
               <?php } else {?>
               <input type="hidden" name="employee_id" id="employee_id" value="<?php echo $session['user_id'];?>" />
               <?php } ?>
+              <!--<div class="col-md-2">
+                <div class="form-group">
+                  <label for="month_year"><?php echo $this->lang->line('xin_select_month');?></label>
+                  <input class="form-control month_year" placeholder="<?php echo $this->lang->line('xin_select_month');?>" readonly id="month_year" name="month_year" type="text" value="<?php echo date('Y-m');?>">
+                </div>
+              </div>-->
               <div class="col-md-2">
                 <div class="form-group">
                   <label for="fecha_inicial">Fecha Inicial</label>
@@ -143,6 +149,12 @@ if($system[0]->is_half_monthly==1){
                 </select>
               </div>
             </div>
+            <!--<div class="col-md-3">
+                <div class="form-group">
+                  <label for="month_year"><?php echo $this->lang->line('xin_select_month');?></label>
+                  <input class="form-control month_year" placeholder="<?php echo $this->lang->line('xin_select_month');?>" readonly name="month_year" type="text" value="<?php echo date('Y-m');?>" id="bmonth_year">
+                </div>
+            </div>-->
             </div>
             <div class="row">
               <div class="col-md-12">
@@ -161,6 +173,9 @@ if($system[0]->is_half_monthly==1){
   <?php } ?><?php } ?>
 </div>
 <div class="box <?php echo $get_animate;?>">
+  <!--<div class="box-header with-border">
+    <h3 class="box-title"> <?php echo $this->lang->line('xin_payment_info_for');?> <span class="text-danger" id="p_month"><?php echo date('Y-m');?></span> </h3>
+  </div>-->
   <div class="box-body">
     <div class="box-datatable table-responsive">
       <table class="datatables-demo table table-striped table-bordered" id="xin_table">
@@ -173,6 +188,7 @@ if($system[0]->is_half_monthly==1){
             <th><i class="fa fa-dollar"></i> <?php echo $this->lang->line('xin_payroll_net_salary');?></th>
             <th>Días trabajados</th>
             <th><?php echo $this->lang->line('dashboard_xin_status');?></th>
+            
           </tr>
         </thead>
       </table>
@@ -180,6 +196,6 @@ if($system[0]->is_half_monthly==1){
   </div>
 </div>
 <style type="text/css">
-    .hide-calendar .ui-datepicker-calendar { display:none !important; }
-    .hide-calendar .ui-priority-secondary { display:none !important; }
+.hide-calendar .ui-datepicker-calendar { display:none !important; }
+.hide-calendar .ui-priority-secondary { display:none !important; }
 </style>
