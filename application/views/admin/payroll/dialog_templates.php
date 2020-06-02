@@ -642,7 +642,7 @@ if($profile_picture!='' && $profile_picture!='no file') {
                       </tr>
                       <?php } ?>
                       <tr>
-                        <td><strong><?php echo $this->lang->line('xin_acc_total');?>:</strong> <span class="pull-right"><?php echo $this->Xin_model->currency_sign($other_payments_amount);?></span></td>
+                        <td><strong><?php echo "Total por horas trabajadas:";?>:</strong> <span class="pull-right"><?php echo $this->Xin_model->currency_sign((($other_payments_amount/30)/12)*$pcount);?></span></td>
                       </tr>
                     </tbody>
                   </table>

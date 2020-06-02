@@ -348,6 +348,7 @@ class Payroll extends MY_Controller {
 			} else {
 				$other_payments_amount = 0;
 			}
+			$other_payments_amount = (($other_payments_amount/30)/12)*$pcount;
 			// statutory_deductions
 			$count_statutory_deductions = $this->Employees_model->count_employee_statutory_deductions($r->user_id);
 			$statutory_deductions = $this->Employees_model->set_employee_statutory_deductions($r->user_id);
@@ -1828,8 +1829,9 @@ class Payroll extends MY_Controller {
 			} else {
 				$account_number = '--';	
 			}
+			//<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$r->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span>
 			$diasTrabajados = $this->Employees_model->get_dias_trabajados( $r->employee_id, $fecha_inicialR, $fecha_finalR);
-			$payslip = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$r->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span><span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$r->payslip_key.'?fecha_inicial='.$fecha_inicialR.'&fecha_final='.$fecha_finalR.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+			$payslip = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$r->payslip_key.'?fecha_inicial='.$fecha_inicialR.'&fecha_final='.$fecha_finalR.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
 			
 			$ifull_name = nl2br ($full_name."\r\n <small class='text-muted'><i>".$this->lang->line('xin_employees_id').': '.$emp_link."<i></i></i></small>\r\n <small class='text-muted'><i>".$department_designation.'<i></i></i></small>');
                $data[] = array(
@@ -2059,7 +2061,7 @@ class Payroll extends MY_Controller {
 		//$pdf->SetTitle('Workable-Zone - Payslip');
 		//$pdf->SetSubject('TCPDF Tutorial');
 		//$pdf->SetKeywords('TCPDF, PDF, example, test, guide');
-		$pdf->SetHeaderData('../../../uploads/logo/payroll/'.$system[0]->payroll_logo, 15, $company_name, $header_string);
+		$pdf->SetHeaderData('../../../../../uploads/logo/payroll/'.$system[0]->payroll_logo, 15, $company_name, $header_string);
 			
 		$pdf->setFooterData(array(0,64,0), array(0,64,128));
 		
@@ -2209,14 +2211,13 @@ class Payroll extends MY_Controller {
 			$overtime_total = $r_overtime->overtime_hours * $r_overtime->overtime_rate;
 			$overtime_amount += $overtime_total;
 		}
-
 		$tbl = '<br><br>
 		<table cellpadding="1" cellspacing="1" border="0">
 			<tr>
 				<td align="center"><h1>Nómina General - Seguridad Privada</h1></td>
 			</tr>
 			<tr>
-				<td align="center"><strong>Del: '.$fecha_inicialRR.' Al: '.$fecha_finalRR.'</strong></td>
+				<td align="center"><strong>Del '.$fecha_inicialRR.' al '.$fecha_finalRR.'</strong></td>
 			</tr>
 		</table>
 		';
@@ -2237,29 +2238,15 @@ class Payroll extends MY_Controller {
 		//$pdf->Ln(7);
 		$tbl1 = '
 		<table cellpadding="3" cellspacing="0" border="1">
-			<tr bgcolor="#69e48a">
-			<td colspan="4"><strong>Detalles del empleado</strong></td>
+			<tr bgcolor="#gray">
+			<td colspan="4" align="center"><strong>Nombre del empleado</strong></td>
 			</tr>
 			<tr>
-				<td>'.$this->lang->line('xin_name').'</td>
-				<td>'.$fname.'</td>
-				<td>'.$this->lang->line('dashboard_employee_id').'</td>
-				<td>'.$user[0]->employee_id.'</td>
-			</tr>
-			<tr>
-				<td>'.$this->lang->line('left_department').'</td>
-				<td>'.$_department_name.'</td>
-				<td>'.$this->lang->line('left_designation').'</td>
-				<td>'.$_designation_name.'</td>
+				<td colspan="4" align="center">'.$fname.'</td>
 			</tr>';
 			if($payment[0]->payslip_type=='hourly'){
 				$hcount = $payment[0]->hours_worked;
-				$tbl1 .= '<tr>
-				<td>'.$this->lang->line('xin_employee_doj').'</td>
-				<td>'.$date_of_joining.'</td>
-				<td>'.$this->lang->line('xin_payroll_hours_worked_total').'</td>
-				<td>'.$hcount.'</td>
-			</tr>';
+				$tbl1 .= '';
 			} else {
 				$date = strtotime($payment[0]->year_to_date);
 				$day = date('d', $date);
@@ -2382,7 +2369,7 @@ class Payroll extends MY_Controller {
 			</tr>';
 			}
 		$tbl1 .= '</table>';
-		
+		$other_payments_amount = (($other_payments_amount/30)/12)*$hcount;
 		$pdf->writeHTML($tbl1, true, false, true, false, '');
 		if($payment[0]->payslip_type=='hourly'){
 			$total_earning = $allowances_amount + $commissions_amount + $other_payments_amount + $overtime_amount;	
@@ -2399,7 +2386,7 @@ class Payroll extends MY_Controller {
 			</tr>*/
 		//// break..
 		$pdf->Ln(7);
-		$tblbrk = '<table cellpadding="3" cellspacing="0" border="1"><tr bgcolor="#69e48a">
+		$tblbrk = '<table cellpadding="3" cellspacing="0" border="1"><tr bgcolor="#gray">
 				<td colspan="2" align="center"><strong>'.$this->lang->line('xin_description').'</strong></td>
 				<td align="center"><strong>'.$this->lang->line('xin_payslip_earning').'</strong></td>	
 				<td align="center"><strong>'.$this->lang->line('xin_deductions').'</strong></td>			
@@ -2412,7 +2399,7 @@ class Payroll extends MY_Controller {
 				</tr>';
 			} else {
 				$tblbrk .= '<tr>
-					<td colspan="2">'.$this->lang->line('xin_payroll_hourly_rate').' x '.$this->lang->line('xin_payroll_hours_worked_total').'<br> '.$this->Xin_model->currency_sign($bs).' x '.$hcount.'</td>
+					<td colspan="2" align="center">'.'Sueldo'.' por '.($hcount/12).' dias trabajados'.'</td>
 					<td align="center"  valign="bottom">'.$this->Xin_model->currency_sign($total_count).'</td>	
 					<td>&nbsp;</td>				
 				</tr>';
@@ -2421,7 +2408,7 @@ class Payroll extends MY_Controller {
 			if($count_allowances > 0) {
 				foreach($allowances->result() as $sl_allowances) {
 				$tblbrk .= '<tr>
-					<td colspan="2">'.$sl_allowances->allowance_title.'</td>
+					<td colspan="2" align="center">'.$sl_allowances->allowance_title.'</td>
 					<td align="center">'.$this->Xin_model->currency_sign($sl_allowances->allowance_amount).'</td>	
 					<td>&nbsp;</td>				
 					</tr>';
@@ -2431,7 +2418,7 @@ class Payroll extends MY_Controller {
 			if($count_commissions > 0) {
 				foreach($commissions->result() as $sl_commissions) {
 				$tblbrk .= '<tr>
-					<td colspan="2">'.$sl_commissions->commission_title.'</td>
+					<td colspan="2" align="center">'.$sl_commissions->commission_title.'</td>
 					<td align="center">'.$this->Xin_model->currency_sign($sl_commissions->commission_amount).'</td>	
 					<td>&nbsp;</td>				
 					</tr>';
@@ -2441,8 +2428,8 @@ class Payroll extends MY_Controller {
 			if($count_other_payments > 0) {
 				foreach($other_payments->result() as $sl_other_payments) {
 				$tblbrk .= '<tr>
-					<td colspan="2">'.$sl_other_payments->payments_title.'</td>
-					<td align="center">'.$this->Xin_model->currency_sign($sl_other_payments->payments_amount).'</td>	
+					<td colspan="2" align="center">'.$sl_other_payments->payments_title.'</td>
+					<td align="center">'.$this->Xin_model->currency_sign(((($sl_other_payments->payments_amount)/30)/12)*$hcount).'</td>	
 					<td>&nbsp;</td>				
 					</tr>';
 				}
@@ -2452,7 +2439,7 @@ class Payroll extends MY_Controller {
 				foreach($overtime->result() as $r_overtime) {
 					$overtime_total = $r_overtime->overtime_hours * $r_overtime->overtime_rate;
 				$tblbrk .= '<tr>
-					<td colspan="2">'.$r_overtime->overtime_title.'</td>
+					<td colspan="2" align="center">'.$r_overtime->overtime_title.'</td>
 					<td align="center">'.$this->Xin_model->currency_sign($overtime_total).'</td>	
 					<td>&nbsp;</td>				
 					</tr>';
@@ -2500,7 +2487,7 @@ class Payroll extends MY_Controller {
 					</tr></table>
 					<table cellpadding="3" cellspacing="0" border="1">
 					<tr><td colspan="2" align="center">&nbsp;</td>
-					<td colspan="2" align="center" bgcolor="#69e48a"><strong>PAGO NETO</strong></td>
+					<td colspan="2" align="center" bgcolor="#gray"><strong>PAGO NETO</strong></td>
 					</tr><tr><td colspan="2" align="center"></td>
 					<td colspan="2" align="center"><strong>'.$this->Xin_model->currency_sign($fsalary).'</strong></td>
 					</tr></table>';
@@ -2515,7 +2502,7 @@ class Payroll extends MY_Controller {
 					</tr></table>
 					<table cellpadding="3" cellspacing="0" border="1">
 					<tr><td colspan="2" align="center">&nbsp;</td>
-					<td colspan="2" align="center" bgcolor="#69e48a"><strong>PAGO NETO</strong></td>
+					<td colspan="2" align="center" bgcolor="#gray"><strong>PAGO NETO</strong></td>
 					</tr><tr><td colspan="2" align="center">'.ucwords($this->Xin_model->convertNumberToWord($total_net_salary)).'</td>
 					<td colspan="2" align="center"><strong>'.$this->Xin_model->currency_sign($total_net_salary).'</strong></td>
 					</tr></table>';
@@ -2618,7 +2605,10 @@ class Payroll extends MY_Controller {
 		$tbl = '
 		<table cellpadding="5" cellspacing="0" border="0">
 			<tr>
-				<td align="right" colspan="1">This is a computer generated slip and does not require signature.</td>
+			    <td align="center"> FIRMA: _____________________________________________________________</td>
+			</tr>
+			<tr>
+				<td align="center" colspan="1">Recibo de VAKANDI S de RL de CV por concepto de salario y demas prestaciones del periodo indicado sin que a la fecha se me adeude cantidad alguna por ningun concepto</td>
 			</tr>
 		</table>';
 		$pdf->writeHTML($tbl, true, false, false, false, '');

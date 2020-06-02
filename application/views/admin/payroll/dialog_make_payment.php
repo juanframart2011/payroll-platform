@@ -357,7 +357,7 @@ if($count_loan_deduction > 0) {
 } else {
 	$loan_de_amount = 0;
 }
-// 4: other payment
+/*// 4: other payment
 $other_payments = $this->Employees_model->set_employee_other_payments($user_id);
 $other_payments_amount = 0;
 if(!is_null($other_payments)):
@@ -366,7 +366,8 @@ if(!is_null($other_payments)):
 	}
 endif;
 // all other payment
-$all_other_payment = $other_payments_amount;
+$all_other_payment = $other_payments_amount;*/
+$all_other_payment = 0;
 // 5: commissions
 $commissions = $this->Employees_model->set_employee_commissions($user_id);
 if(!is_null($commissions)):
@@ -478,7 +479,18 @@ if($pcount > 0){
 } else {
 	$fsalary = $pcount;
 }
+
+$other_payments = $this->Employees_model->set_employee_other_payments($user_id);
+$other_payments_amount = 0;
+if(!is_null($other_payments)):
+	foreach($other_payments->result() as $sl_other_payments) {
+		$other_payments_amount += $sl_other_payments->payments_amount;
+	}
+endif;
+// all other payment
+$all_other_payment = (($other_payments_amount/30)/12)*$pcount;
 $net_salary = $fsalary;
+$net_salary = $net_salary+$all_other_payment;
 $net_salary = number_format((float)$net_salary, 2, '.', '');
 ?>
 <div class="modal-body" style="overflow:auto; height:530px;">
