@@ -1072,7 +1072,8 @@ class Employees extends MY_Controller {
 	  exit();
      }
 	 
-	  public function detail() {
+
+	 public function detail() {
 
 		$session = $this->session->userdata('username');
 		if(empty($session)){ 
@@ -1088,13 +1089,6 @@ class Employees extends MY_Controller {
 		if(!in_array('202',$role_resources_ids)) {
 			redirect('admin/employees');
 		}
-		/*if($check_role[0]->user_id!=$result[0]->user_id) {
-			redirect('admin/employees');
-		}*/
-		
-		//$role_resources_ids = $this->Xin_model->user_role_resource();
-		//$data['breadcrumbs'] = $this->lang->line('xin_employee_details');
-		//$data['path_url'] = 'employees_detail';	
 
 		$data = array(
 			'breadcrumbs' => $this->lang->line('xin_employee_detail'),
@@ -1163,7 +1157,7 @@ class Employees extends MY_Controller {
 		$draw = intval($this->input->get("draw"));
 		$start = intval($this->input->get("start"));
 		$length = intval($this->input->get("length"));
-	 }
+	}
 	
 	// get company > departments
 	 public function get_departments() {

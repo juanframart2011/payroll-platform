@@ -1,4 +1,21 @@
-$(document).ready(function(){			
+$(document).ready(function(){
+
+	$( "#overtime_hours" ).keyup( function(){
+
+		let hour = $( this ).val();
+		
+		if( hour ){
+
+			var mensual_salary = $( "#mensual_salary" ).val();
+			var amountBono = $( "#amountBono" ).val();
+
+			var bono = ( mensual_salary + amountBono ) / 30;
+			bono = bono / hour;
+
+			console.info( "hour => ", hour );
+			$( "#overtime_rate" ).val( bono );
+		}
+	});
 	
 	// get data
 	$('.edit-modal-data').on('show.bs.modal', function (event) {
@@ -165,18 +182,7 @@ $(document).ready(function(){
 		var final_val = to_currency_rate * curr_val;
 		var float_val = final_val.toFixed(2);
 		$('#current_cur_val2').html(float_val);
-	});	
-	
-	/*jQuery("#wages_type").change(function(){
-		var wopt = $(this).val();
-		if(wopt == 1){
-			$('#deduct_options').show();
-			$('#half_monthly_is').show();
-		} else {
-			$('#deduct_options').hide();
-			$('#half_monthly_is').hide();
-		}
-	});*/
+	});
 	
 	/* Update profile picture */
 	$("#f_profile_picture").submit(function(e){
@@ -270,12 +276,6 @@ $(document).ready(function(){
 		});
 	});
 
-	// get departments
-	/*jQuery("#aj_company").change(function(){
-		jQuery.get(base_url+"/get_departments/"+jQuery(this).val(), function(data, status){
-			jQuery('#department_ajax').html(data);
-		});
-	});*/
 	jQuery("#aj_company").change(function(){
 		jQuery.get(escapeHtmlSecure(base_url+"/get_company_elocations/"+jQuery(this).val()), function(data, status){
 			jQuery('#location_ajax').html(data);
@@ -647,8 +647,6 @@ $(document).ready(function(){
 			},
 			error: function() 
 			{
-				//toastr.clear();
-//$('#hrload-img').hide();
 				toastr.error(JSON.error);
 				$('.save').prop('disabled', false);
 			} 	        
@@ -666,8 +664,7 @@ $(document).ready(function(){
 		e.preventDefault();
 		$('.icon-spinner3').show();
 		$('.save').prop('disabled', true);
-		//$('#hrload-img').show();
-//toastr.info(processing_request);
+
 		$.ajax({
 			url: e.target.action,
 			type: "POST",
@@ -1388,6 +1385,5 @@ $(document).ready(function(){
 	  changeYear: true,
 	  dateFormat:'yy-mm-dd',
 	  yearRange: '1990:' + (new Date().getFullYear() + 10),
-	});	
-	
+	});
 });
