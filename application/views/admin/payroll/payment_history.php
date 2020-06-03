@@ -3,35 +3,34 @@
 */
 $session = $this->session->userdata('username');
 $get_animate = $this->Xin_model->get_content_animate();
-$user_info = $this->Xin_model->read_user_info($session['user_id']);
-if($user_info[0]->user_role_id==1){ ?>
+$user_info = $this->Xin_model->read_user_info($session['user_id']);?>
 
-    <div id="filter_hrsale" class="collapse add-formd <?php echo $get_animate;?>" data-parent="#accordion" style="">
-        <div class="box mb-4 <?php echo $get_animate;?>">
-            <div class="box-header  with-border">
-                <h3 class="box-title"><?php echo $this->lang->line('xin_filter');?></h3>
-                <div class="box-tools pull-right">
-                    <a class="text-dark collapsed" data-toggle="collapse" href="#filter_hrsale" aria-expanded="false">
-                        <button type="button" class="btn btn-xs btn-primary"> <span class="fa fa-minus"></span> <?php echo $this->lang->line('xin_hide');?></button>
-                    </a>
-                </div>
+<div id="filter_hrsale" class="collapse add-formd <?php echo $get_animate;?>" data-parent="#accordion" style="">
+    <div class="box mb-4 <?php echo $get_animate;?>">
+        <div class="box-header  with-border">
+            <h3 class="box-title"><?php echo $this->lang->line('xin_filter');?></h3>
+            <div class="box-tools pull-right">
+                <a class="text-dark collapsed" data-toggle="collapse" href="#filter_hrsale" aria-expanded="false">
+                    <button type="button" class="btn btn-xs btn-primary"> <span class="fa fa-minus"></span> <?php echo $this->lang->line('xin_hide');?></button>
+                </a>
             </div>
+        </div>
 
-            <div class="box-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <?php
-                        $attributes = array('name' => 'payroll_report', 'id' => 'ihr_report', 'autocomplete' => 'off', 'class' => 'add form-hrm');
-                        $hidden = array('user_id' => $session['user_id']);
-                        echo form_open('admin/payroll/payment_history_list', $attributes, $hidden);
-                        $data = array(
-                        'type'        => 'hidden',
-                        'name'        => 'date_format',
-                        'id'          => 'date_format',
-                        'value'       => $this->Xin_model->set_date_format(date('Y-m-d')),
-                        'class'       => 'form-control',
-                        );
-                        echo form_input($data);?>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <?php
+                    $attributes = array('name' => 'payroll_report', 'id' => 'ihr_report', 'autocomplete' => 'off', 'class' => 'add form-hrm');
+                    $hidden = array('user_id' => $session['user_id']);
+                    echo form_open('admin/payroll/payment_history_list', $attributes, $hidden);
+                    $data = array(
+                    'type'        => 'hidden',
+                    'name'        => 'date_format',
+                    'id'          => 'date_format',
+                    'value'       => $this->Xin_model->set_date_format(date('Y-m-d')),
+                    'class'       => 'form-control',
+                    );
+                    echo form_input($data);?>
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -45,7 +44,7 @@ if($user_info[0]->user_role_id==1){ ?>
                                 </div>
                             </div>
 
-                            <div class="col-md-3" id="location_ajax">
+                            <div class="col-md-2" id="location_ajax">
                                 <div class="form-group">
                                     <label for="name"><?php echo $this->lang->line('left_location');?></label>
                                     <select disabled="disabled" name="location_id" id="aj_location_id" class="form-control" data-plugin="select_hrm" data-placeholder="<?php echo $this->lang->line('left_location');?>">
@@ -62,28 +61,36 @@ if($user_info[0]->user_role_id==1){ ?>
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fecha_inicial">Fecha Inicial</label>
+                                    <input class="form-control fecha_inicial" placeholder="Fecha Inicial" readonly id="fecha_inicial" name="fecha_inicial" type="text" value="<?php echo date('Y-m-d');?>">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fecha_final">Fecha Final</label>
+                                    <input class="form-control fecha_final" placeholder="Fecha Final" readonly id="fecha_final" name="fecha_final" type="text" value="<?php echo date('Y-m-d');?>">
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-actions box-footer"> <?php echo form_button(array('name' => 'hrsale_form', 'type' => 'submit', 'class' => $this->Xin_model->form_button_class(), 'content' => '<i class="fa fa fa-check-square-o"></i> '.$this->lang->line('xin_get'))); ?> </div>
-                        <?php echo form_close(); ?>
-                    </div>
+                        <div class="form-actions box-footer"> <?php echo form_button(array('name' => 'hrsale_form', 'type' => 'submit', 'class' => $this->Xin_model->form_button_class(), 'content' => '<i class="fa fa fa-check-square-o"></i> '.$this->lang->line('xin_get'))); ?></div>
+                    <?php echo form_close(); ?>
                 </div>
             </div>
         </div>
     </div>
-<?php 
-}?>
+</div>
 
 <div class="box <?php echo $get_animate;?>">
     <div class="box-header with-border">
         <h3 class="box-title"> <?php echo $this->lang->line('xin_list_all');?> <?php echo $this->lang->line('left_payment_history');?></h3>
-        <?php
-        if($user_info[0]->user_role_id==1){ ?>
-            <div class="box-tools pull-right"> <a class="text-dark collapsed" data-toggle="collapse" href="#filter_hrsale" aria-expanded="false">
-                <button type="button" class="btn btn-xs btn-primary"> <span class="fa fa-filter"></span> <?php echo $this->lang->line('xin_filter');?></button></a>
-            </div>
-        <?php
-        } ?>
+        <div class="box-tools pull-right"> <a class="text-dark collapsed" data-toggle="collapse" href="#filter_hrsale" aria-expanded="false">
+            <button type="button" class="btn btn-xs btn-primary"> <span class="fa fa-filter"></span> <?php echo $this->lang->line('xin_filter');?></button></a>
+        </div>
     </div>
 
     <div class="box-body">
@@ -109,6 +116,12 @@ if($user_info[0]->user_role_id==1){ ?>
                     </tr>
                 </thead>
             </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Pago Neto Total <b id="totalAmountNomina"></b></h4>
         </div>
     </div>
 </div>

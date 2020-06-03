@@ -1749,10 +1749,12 @@ class Timesheet extends MY_Controller {
 	 public function get_update_employees() {
 
 		$data['title'] = $this->Xin_model->site_title();
-		$id = $this->uri->segment(4);
+		$id = $this->input->get("company");
+		$location = $this->input->get("location");
 		
 		$data = array(
-			'company_id' => $id
+			'company_id' => $id,
+			'location' => $location
 			);
 		$session = $this->session->userdata('username');
 		if(!empty($session)){ 
@@ -2214,8 +2216,7 @@ class Timesheet extends MY_Controller {
 			else{
 
 				$turno = '';
-			}
-			
+			}			
 			
 			if(in_array('278',$role_resources_ids)) { //edit
 				$edit = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_edit').'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light edit-data" data-toggle="modal" data-target=".edit-modal-data" data-attendance_id="'.$r->time_attendance_id.'"><i class="fa fa-pencil"></i></button></span>';

@@ -1399,46 +1399,50 @@ $leave_user = $this->Xin_model->read_user_info($eid);
         <?php if(in_array('351',$role_resources_ids)) {?>
 
             <div class="tab-pane <?php echo $get_animate;?>" id="xin_employee_set_salary"  >
+                
                 <div class="card-body">
+
                 <div class="card overflow-hidden">
                 <div class="row no-gutters row-bordered row-border-light">
-                <div class="col-md-3 pt-0">
-                <div class="list-group list-group-flush account-settings-links"> <a class="salary-tab-list list-group-item list-group-item-action active salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="1" data-profile-block="salary" aria-expanded="true" id="suser_profile_1"><?php echo $this->lang->line('xin_employee_update_salary');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="2" data-profile-block="set_allowances" aria-expanded="true" id="suser_profile_2"><?php echo $this->lang->line('xin_employee_set_allowances');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="3" data-profile-block="commissions" aria-expanded="true" id="suser_profile_3"><?php echo $this->lang->line('xin_hr_commissions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="4" data-profile-block="loan_deductions" aria-expanded="true" id="suser_profile_4"><?php echo $this->lang->line('xin_employee_set_loan_deductions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="5" data-profile-block="statutory_deductions" aria-expanded="true" id="suser_profile_5"><?php echo $this->lang->line('xin_employee_set_statutory_deductions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="6" data-profile-block="other_payment" aria-expanded="true" id="suser_profile_6"><?php echo $this->lang->line('xin_employee_set_other_payment');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="7" data-profile-block="overtime" aria-expanded="true" id="suser_profile_7"><?php echo $this->lang->line('dashboard_overtime');?></a> </div>
-                </div>
+                    <div class="col-md-3 pt-0">
+                        <div class="list-group list-group-flush account-settings-links">
+                            <a class="salary-tab-list list-group-item list-group-item-action active salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="1" data-profile-block="salary" aria-expanded="true" id="suser_profile_1"><?php echo $this->lang->line('xin_employee_update_salary');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="2" data-profile-block="set_allowances" aria-expanded="true" id="suser_profile_2"><?php echo $this->lang->line('xin_employee_set_allowances');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="3" data-profile-block="commissions" aria-expanded="true" id="suser_profile_3"><?php echo $this->lang->line('xin_hr_commissions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="4" data-profile-block="loan_deductions" aria-expanded="true" id="suser_profile_4"><?php echo $this->lang->line('xin_employee_set_loan_deductions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="5" data-profile-block="statutory_deductions" aria-expanded="true" id="suser_profile_5"><?php echo $this->lang->line('xin_employee_set_statutory_deductions');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="6" data-profile-block="other_payment" aria-expanded="true" id="suser_profile_6"><?php echo $this->lang->line('xin_employee_set_other_payment');?></a> <a class="salary-tab-list list-group-item list-group-item-action salary-tab" data-toggle="list" href="javascript:void(0);" data-profile="7" data-profile-block="overtime" aria-expanded="true" id="suser_profile_7"><?php echo $this->lang->line('dashboard_overtime');?></a>
+                        </div>
+                    </div>
                 <div class="col-md-9">
-                <div class="tab-content active">
-                <div class="tab-pane <?php echo $get_animate;?> salary-current-tab active" id="salary">
-                <div class="box-header with-border">
-                <h3 class="box-title"> <?php echo $this->lang->line('xin_employee_update_salary');?> </h3>
-                </div>
+                    <div class="tab-content active">
+                    <div class="tab-pane <?php echo $get_animate;?> salary-current-tab active" id="salary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"> <?php echo $this->lang->line('xin_employee_update_salary');?> </h3>
+                        </div>
                 <div class="box-body pb-2">
                 <?php $attributes = array('name' => 'employee_update_salary', 'id' => 'employee_update_salary', 'autocomplete' => 'off');?>
                 <?php $hidden = array('user_id' => $user_id, 'u_basic_info' => 'UPDATE');?>
                 <?php echo form_open('admin/employees/update_salary_option', $attributes, $hidden);?>
                 <div class="bg-white">
-                <div class="row">
-                <div class="col-md-4">
-                <div class="form-group">
-                <label for="wages_type"><?php echo $this->lang->line('xin_employee_type_wages');?><i class="hrsale-asterisk">*</i></label>
-                <select name="wages_type" id="wages_type" class="form-control" data-plugin="select_hrm">
-                <!--<option value="1" <?php if($wages_type==1):?> selected="selected"<?php endif;?>><?php echo $this->lang->line('xin_payroll_basic_salary');?></option>-->
-                <option value="2" <?php if($wages_type==2):?> selected="selected"<?php endif;?>><?php echo $this->lang->line('xin_employee_daily_wages');?></option>
-                </select>
-                </div>
-                </div>
-                <div class="col-md-4">
-                <div class="form-group">
-                <label for="mensual_salary">Salario Mensual<i class="hrsale-asterisk">*</i></label>
-                <input class="form-control mensual_salary" placeholder="Salario Mensual" name="mensual_salary" id="mensual_salary" type="text" value="<?php echo $eresult[0]->mensual_salary;?>">
-                </div>
-                </div>
-                <div class="col-md-4">
-                <div class="form-group">
-                <label for="horas_dia">Horas Trabajadas por Día<i class="hrsale-asterisk">*</i></label>
-                <input class="form-control horas_dia" placeholder="Horas por Día" name="horas_dia" id="horas_dia" type="text" value="<?php echo $eresult[0]->horas_dia;?>">
-                </div>
-                </div>                           
-                </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="wages_type"><?php echo $this->lang->line('xin_employee_type_wages');?><i class="hrsale-asterisk">*</i></label>
+                                <select name="wages_type" id="wages_type" class="form-control" data-plugin="select_hrm">
+                                <!--<option value="1" <?php if($wages_type==1):?> selected="selected"<?php endif;?>><?php echo $this->lang->line('xin_payroll_basic_salary');?></option>-->
+                                    <option value="2" <?php if($wages_type==2):?> selected="selected"<?php endif;?>><?php echo $this->lang->line('xin_employee_daily_wages');?></option>
+                                </select>
+                            </div>
+                        </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="mensual_salary">Salario Mensual<i class="hrsale-asterisk">*</i></label>
+                            <input class="form-control mensual_salary" placeholder="Salario Mensual" name="mensual_salary" id="mensual_salary" type="text" value="<?php echo $eresult[0]->mensual_salary;?>">
+                        </div>
+                    </div>
+                        <div class="col-md-4">
+                        <div class="form-group">
+                        <label for="horas_dia">Horas Trabajadas por Día<i class="hrsale-asterisk">*</i></label>
+                        <input class="form-control horas_dia" placeholder="Horas por Día" name="horas_dia" id="horas_dia" type="text" value="<?php echo $eresult[0]->horas_dia;?>">
+                        </div>
+                        </div>                           
+                    </div>
                 <div class="row">
                 <div class="col-md-4">
                 <div class="form-group">
@@ -1464,25 +1468,25 @@ $leave_user = $this->Xin_model->read_user_info($eid);
                 <?php echo form_close(); ?> </div>
                 </div>
                 <div class="tab-pane <?php echo $get_animate;?> salary-current-tab" id="set_allowances">
-                <div class="box">
-                <div class="box-header with-border">
-                <h3 class="box-title"> <?php echo $this->lang->line('xin_list_all');?> <?php echo $this->lang->line('xin_employee_set_allowances');?> </h3>
-                </div>
-                <div class="box-body">
-                <div class="box-datatable table-responsive">
-                <table class="table table-striped table-bordered dataTable" id="xin_table_all_allowances" style="width:100%;">
-                <thead>
-                <tr>
-                <th><?php echo $this->lang->line('xin_action');?></th>
-                <th><?php echo $this->lang->line('xin_salary_allowance_options');?></th>
-                <th><?php echo $this->lang->line('dashboard_xin_title');?></th>
-                <th><?php echo $this->lang->line('xin_amount');?></th>
-                </tr>
-                </thead>
-                </table>
-                </div>
-                </div>
-                </div>
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"> <?php echo $this->lang->line('xin_list_all');?> <?php echo $this->lang->line('xin_employee_set_allowances');?> </h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="box-datatable table-responsive">
+                                <table class="table table-striped table-bordered dataTable" id="xin_table_all_allowances" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th><?php echo $this->lang->line('xin_action');?></th>
+                                            <th><?php echo $this->lang->line('xin_salary_allowance_options');?></th>
+                                            <th><?php echo $this->lang->line('dashboard_xin_title');?></th>
+                                            <th><?php echo $this->lang->line('xin_amount');?></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 <div class="box-header with-border">
                 <h3 class="box-title"> <?php echo $this->lang->line('xin_employee_set_allowances');?> </h3>
                 </div>

@@ -24,6 +24,10 @@ jQuery("#aj_company").change(function(){
 	jQuery.get(base_url+"/get_employees/"+jQuery(this).val(), function(data, status){
 		jQuery('#employee_ajax').html(data);
 	});
+
+	jQuery.get(escapeHtmlSecure(site_url+"department/get_company_locations/"+jQuery(this).val()), function(data, status){
+		jQuery('#location_ajax').html(data);
+	});
 });
 jQuery("#aj_companyx").change(function(){
 	jQuery.get(escapeHtmlSecure(base_url+"/get_company_plocations/"+jQuery(this).val()), function(data, status){
@@ -303,11 +307,4 @@ $.ajax({
 $( document ).on( "click", ".delete", function() {
 $('input[name=_token]').val($(this).data('record-id'));
 $('#delete_record').attr('action',base_url+'/payslip_delete/'+$(this).data('record-id'))+'/';
-});
-
-jQuery("#aj_company").change(function(){
-
-	jQuery.get(escapeHtmlSecure(site_url+"department/get_company_locations/"+jQuery(this).val()), function(data, status){
-		jQuery('#location_ajax').html(data);
-	});
 });

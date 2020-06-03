@@ -5,14 +5,32 @@ var xin_table = $('#xin_table').dataTable({
 		url : site_url+"timesheet/update_attendance_list/?employee_id="+$('#employee_id').val()+"&attendance_date="+$('#attendance_date').val(),
 		type : 'GET'
 	},
-	/*dom: 'lBfrtip',
-	"buttons": ['csv', 'excel', 'pdf', 'print'], // colvis > if needed
-	"fnDrawCallback": function(settings){
-	$('[data-toggle="tooltip"]').tooltip();          
-	}*/
 });
 jQuery("#aj_company").change(function(){
-	jQuery.get(base_url+"/get_update_employees/"+jQuery(this).val(), function(data, status){
+	
+	jQuery.get(escapeHtmlSecure(site_url+"department/get_company_locations/"+jQuery(this).val()), function(data, status){
+		jQuery('#location_ajax').html(data);
+	});
+});
+
+/*jQuery( "#location_id" ).change(function(){
+
+	var location = jQuery( "select[name='location_id']" ).val();
+	console.log( "location => ", location );
+
+	jQuery.get(base_url+"/get_update_employees/company="+jQuery(this).val()+"&location="+location, function(data, status){
+		jQuery('#employee_ajax').html(data);
+	});
+});*/
+
+jQuery( document ).on( "change", ".form-control[name='location_id']", function( e ){
+
+	//console.info( "change2xx =>", $( this ).val() );
+
+	var location = jQuery( "select[name='location_id']" ).val();
+	console.log( "location => ", location );
+
+	jQuery.get(base_url+"/get_update_employees?company="+jQuery(this).val()+"&location="+location, function(data, status){
 		jQuery('#employee_ajax').html(data);
 	});
 });
@@ -41,6 +59,7 @@ $("#update_attendance_report").submit(function(e){
 	e.preventDefault();
 	var employee_id = $('#employee_id').val();
 	var attendance_date = $('#attendance_date').val();
+
 	var xin_table2 = $('#xin_table').dataTable({
 		"bDestroy": true,
 		"ajax": {

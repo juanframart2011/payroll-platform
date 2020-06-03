@@ -1,19 +1,19 @@
 <?php
- /**
- * NOTICE OF LICENSE
- *
- * This source file is subject to the HRSALE License
- * that is bundled with this package in the file license.txt.
- * It is also available through the world-wide-web at this URL:
- * http://www.hrsale.com/license.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to hrsalesoft@gmail.com so we can send you a copy immediately.
- *
- * @author   HRSALE
- * @author-email  hrsalesoft@gmail.com
- * @copyright  Copyright © hrsale.com. All Rights Reserved
- */
+/**
+* NOTICE OF LICENSE
+*
+* This source file is subject to the HRSALE License
+* that is bundled with this package in the file license.txt.
+* It is also available through the world-wide-web at this URL:
+* http://www.hrsale.com/license.txt
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to hrsalesoft@gmail.com so we can send you a copy immediately.
+*
+* @author   HRSALE
+* @author-email  hrsalesoft@gmail.com
+* @copyright  Copyright © hrsale.com. All Rights Reserved
+*/
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Payroll extends MY_Controller {
@@ -104,8 +104,9 @@ class Payroll extends MY_Controller {
 	 // payment history
 	public function payment_history()
 	{
-		$session = $this->session->userdata('username');
-		if(empty($session)){ 
+		$session = $this->session->userdata( 'username' );
+
+		if( empty( $session ) ){ 
 		
 			redirect('admin/');
 		}
@@ -1759,48 +1760,77 @@ class Payroll extends MY_Controller {
 		$draw = intval($this->input->get("draw"));
 		$start = intval($this->input->get("start"));
 		$length = intval($this->input->get("length"));
+
+		$fechaInicial = $this->input->get( "fecha_inicial" );
+		$fechaFinal = $this->input->get( "fecha_final" );
 		
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$user_info = $this->Xin_model->read_user_info($session['user_id']);
-		if($this->input->get("ihr")=='true'){
+		if( $this->input->get( "ihr" ) == 'true' ){
+
 			if($this->input->get("company_id")==0 && $this->input->get("location_id")==0 && $this->input->get("department_id")==0){
-				if($this->input->get("salary_month") == ''){
-					$history = $this->Payroll_model->all_employees_payment_history();
-				} else {
-					$history = $this->Payroll_model->all_employees_payment_history_month($this->input->get("salary_month"));
-				}
-			} else if($this->input->get("company_id")!=0 && $this->input->get("location_id")==0 && $this->input->get("department_id")==0){
-				if($this->input->get("salary_month") == ''){
-					$history = $this->Payroll_model->get_company_payslip_history($this->input->get("company_id"));
-				} else {
-					$history = $this->Payroll_model->get_company_payslip_history_month($this->input->get("company_id"),$this->input->get("salary_month"));
-				}
-			} else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")==0 ){
-				if($this->input->get("salary_month") == ''){
-					$history = $this->Payroll_model->get_company_location_payslips($this->input->get("company_id"),$this->input->get("location_id"));
-				} else {
-					$history = $this->Payroll_model->get_company_location_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("salary_month"));
-				}
 				
-			} else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")!=0){
 				if($this->input->get("salary_month") == ''){
-					$history = $this->Payroll_model->get_company_location_department_payslips($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"));
-				} else {
-					$history = $this->Payroll_model->get_company_location_department_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"),$this->input->get("salary_month"));
+					
+					$history = $this->Payroll_model->all_employees_payment_history( $fechaInicial, $fechaFinal );
 				}
-				
+				else {
+					
+					$history = $this->Payroll_model->all_employees_payment_history_month( $this->input->get("salary_month"), $fechaInicial, $fechaFinal );
+				}
 			}
-		} else {
-			if($user_info[0]->user_role_id==1 || $user_info[0]->user_role_id==3){
-				$history = $this->Payroll_model->employees_payment_history();
-			} else {
-				if(in_array('391',$role_resources_ids)) {
-					$history = $this->Payroll_model->get_company_payslips($user_info[0]->company_id);
-				} else {
-					$history = $this->Payroll_model->get_payroll_slip($session['user_id']);
+			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")==0 && $this->input->get("department_id")==0){
+				
+				if($this->input->get("salary_month") == ''){
+					
+					$history = $this->Payroll_model->get_company_payslip_history($this->input->get("company_id"), $fechaInicial, $fechaFinal );
+				}
+				else {
+					
+					$history = $this->Payroll_model->get_company_payslip_history_month($this->input->get("company_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
+				}
+			}
+			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")==0 ){
+				
+				if($this->input->get("salary_month") == ''){
+					
+					$history = $this->Payroll_model->get_company_location_payslips($this->input->get("company_id"),$this->input->get("location_id"), $fechaInicial, $fechaFinal );
+				}
+				else {
+					
+					$history = $this->Payroll_model->get_company_location_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
+				}
+			}
+			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")!=0){
+				
+				if($this->input->get("salary_month") == ''){
+					
+					$history = $this->Payroll_model->get_company_location_department_payslips($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"), $fechaInicial, $fechaFinal );
+				}
+				else {
+					
+					$history = $this->Payroll_model->get_company_location_department_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
 				}
 			}
 		}
+		else {
+
+			if($user_info[0]->user_role_id==1 || $user_info[0]->user_role_id==3){
+				
+				$history = $this->Payroll_model->employees_payment_history( $fechaInicial, $fechaFinal );
+			}
+			else {
+				if(in_array('391',$role_resources_ids)) {
+				
+					$history = $this->Payroll_model->get_company_payslips($user_info[0]->company_id, $fechaInicial, $fechaFinal );
+				}
+				else {
+					
+					$history = $this->Payroll_model->get_payroll_slip($session['user_id'], $fechaInicial, $fechaFinal );
+				}
+			}
+		}
+
 		$data = array();
 
 		foreach($history->result() as $r) {
@@ -1883,7 +1913,8 @@ class Payroll extends MY_Controller {
                "draw" => $draw,
                  "recordsTotal" => $history->num_rows(),
                  "recordsFiltered" => $history->num_rows(),
-                 "data" => $data
+                 "data" => $data,
+                 "p_amount" => $p_amount
             );
           echo json_encode($output);
           exit();

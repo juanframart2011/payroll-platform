@@ -97,11 +97,19 @@
 	}
 	
 	// get single record > company | employees
-	 public function ajax_company_employee_info($id) {
+	 public function ajax_company_employee_info($id, $location=null ) {
 	
-		//$sql = "SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!='1' and is_logged_in='1'";
-		$sql = "SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!='1'";
-		$binds = array($id);
+		if( !empty( $location ) ){
+
+			$sql = "SELECT * FROM xin_employees WHERE company_id = ? and location_id = ? and user_role_id!='1'";
+			$binds = array($id, $location);
+		}
+		else{
+
+			$sql = "SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!='1'";
+			$binds = array($id);
+		}
+		
 		$query = $this->db->query($sql, $binds);
 		
 		if ($query->num_rows() > 0) {

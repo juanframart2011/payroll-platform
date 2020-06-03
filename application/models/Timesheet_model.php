@@ -318,8 +318,8 @@
 	
 	
 	// get payroll templates > NOT USED
-	public function attendance_employee_with_date($emp_id,$attendance_date) {
-		
+	public function attendance_employee_with_date($emp_id,$attendance_date ) {
+
 		$sql = 'SELECT * FROM xin_attendance_time where attendance_date = ? and employee_id = ?';
 		$binds = array($attendance_date,$emp_id);
 		$query = $this->db->query($sql, $binds);

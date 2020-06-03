@@ -74,10 +74,14 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
-	'dsn'	=> 'mysql:host=107.180.121.15;dbname=vakandirh',
-	'hostname' => "107.180.121.15",
-	'username' => "root_vakandi",
-	'password' => "a1b2c3d4",
+	/*'dsn'	=> 'mysql:host=107.180.121.15;dbname=vakandirh',
+	'hostname' => "107.180.121.15",*/
+	'dsn'	=> 'mysql:host=localhost;dbname=vakandirh',
+	'hostname' => "localhost",
+	/*'username' => "root_vakandi",
+	'password' => "a1b2c3d4",*/
+	'username' => "root",
+	'password' => "mysql",
 	'database' => "vakandirh",
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',

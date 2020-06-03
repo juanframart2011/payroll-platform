@@ -23,8 +23,41 @@ var xin_table = $('#xin_table').dataTable({
 			}
 		},], // colvis > if needed
 	"fnDrawCallback": function(settings){
-	$('[data-toggle="tooltip"]').tooltip();          
+
+		if( settings.json ){
+
+			$( "#totalAmountNomina" ).html( settings.json.p_amount );
+		}
+		$('[data-toggle="tooltip"]').tooltip();          
 	}
+});
+
+$('.fecha_inicial').datepicker({
+changeMonth: true,
+changeYear: true,
+maxDate: '0',
+dateFormat:'yy-mm-dd',
+altField: "#date_format",
+altFormat: js_date_format,
+yearRange: '1970:' + new Date().getFullYear(),
+beforeShow: function(input) {
+	$(input).datepicker("widget").show();
+}
+
+});
+
+$('.fecha_final').datepicker({
+changeMonth: true,
+changeYear: true,
+maxDate: '0',
+dateFormat:'yy-mm-dd',
+altField: "#date_format",
+altFormat: js_date_format,
+yearRange: '1970:' + new Date().getFullYear(),
+beforeShow: function(input) {
+	$(input).datepicker("widget").show();
+}
+
 });
 
 $('[data-plugin="select_hrm"]').select2($(this).attr('data-options'));
@@ -35,39 +68,42 @@ jQuery("#aj_company").change(function(){
 	});
 });
 $("#ihr_report").submit(function(e){
-	/*Form Submit*/
+	
 	e.preventDefault();
-	//var attendance_date = $('#attendance_date').val();
-	//var date_format = $('#date_format').val();
-		//$('#att_date').html(date_format);
-		 var xin_table2 = $('#xin_table').dataTable({
-			"bDestroy": true,
-			"ajax": {
-				url : site_url+"payroll/payment_history_list/?ihr=true&company_id="+$('#aj_company').val()+"&location_id="+$('#aj_location_id').val()+"&department_id="+$('#aj_subdepartments').val()+"&salary_month="+$('#salary_month').val(),
-				type : 'GET'
-			},
-			dom: 'lBfrtip',
-			"buttons": [{
-                extend: 'csv',
-                exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
-                }
-            }, {
-                extend: 'excel',
-                exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
-                }
-            }, {
-                extend: 'pdfHtml5',
-                exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
-                }
-            },], // colvis > if needed
-			"fnDrawCallback": function(settings){
-				$('[data-toggle="tooltip"]').tooltip();          
-			}
-		});
-		xin_table2.api().ajax.reload(function(){ }, true);
+
+	var xin_table2 = $('#xin_table').dataTable({
+	"bDestroy": true,
+	"ajax": {
+		url : site_url+"payroll/payment_history_list/?ihr=true&company_id="+$('#aj_company').val()+"&location_id="+$('#aj_location_id').val()+"&department_id="+$('#aj_subdepartments').val()+"&salary_month="+$('#salary_month').val()+"&"+$( "#fecha_inicial" ).serialize()+"&"+$( "#fecha_final" ).serialize(),
+		type : 'GET'
+	},
+	dom: 'lBfrtip',
+	"buttons": [{
+	extend: 'csv',
+	exportOptions: {
+	columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
+	}
+	}, {
+	extend: 'excel',
+	exportOptions: {
+	columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
+	}
+	}, {
+	extend: 'pdfHtml5',
+	exportOptions: {
+	columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
+	}
+	},], // colvis > if needed
+	"fnDrawCallback": function(settings){
+
+		if( settings.json ){
+
+			$( "#totalAmountNomina" ).html( settings.json.p_amount );
+		}
+		$('[data-toggle="tooltip"]').tooltip();          
+	}
+	});
+	xin_table2.api().ajax.reload(function(){ }, true);
 });
 // Month & Year
 $('.month_year').datepicker({

@@ -63,6 +63,12 @@
                   </select>
                 </div>
                 <?php } ?>
+                <div class="form-group" id="location_ajax">
+                    <label for="name"><?php echo $this->lang->line('left_location');?></label>
+                    <select disabled="disabled" name="location_id" id="location_id" class="form-control" data-plugin="select_hrm" data-placeholder="<?php echo $this->lang->line('left_location');?>">
+                        <option value=""></option>
+                    </select>
+                </div>
                 <?php if($user_info[0]->user_role_id==1 || in_array('310',$role_resources_ids)){ ?>
                 <div class="form-group" id="employee_ajax">
                   <label for="employee"><?php echo $this->lang->line('xin_employee');?></label>

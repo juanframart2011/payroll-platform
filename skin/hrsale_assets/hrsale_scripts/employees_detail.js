@@ -6,14 +6,23 @@ $(document).ready(function(){
 		
 		if( hour ){
 
-			var mensual_salary = $( "#mensual_salary" ).val();
-			var amountBono = $( "#amountBono" ).val();
+			let totalBono = $( "#xin_table_all_other_payments" ).find( "tbody" ).find( "tr" ).length;
+			var amountBono = 0;
 
-			var bono = ( mensual_salary + amountBono ) / 30;
-			bono = bono / hour;
+			for( var b = 0; b < totalBono; b++ ){
 
-			console.info( "hour => ", hour );
-			$( "#overtime_rate" ).val( bono );
+				amountBono = amountBono + parseFloat( $( "#xin_table_all_other_payments" ).find( "tbody" ).find( "tr" ).eq( b ).find( "td" ).eq( 2 ).html() );
+			}
+
+			var mensual_salary = parseFloat( $( "#mensual_salary" ).val() );
+
+			var bono = mensual_salary + amountBono;
+			bono = bono / 30;
+			bono = bono / parseFloat( $( "#horas_dia" ).val() );
+
+			bono = bono * hour;
+
+			$( "#overtime_rate" ).val( parseFloat( bono ) );
 		}
 	});
 	

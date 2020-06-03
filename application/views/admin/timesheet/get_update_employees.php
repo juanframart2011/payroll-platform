@@ -1,4 +1,4 @@
-<?php $result = $this->Department_model->ajax_company_employee_info($company_id);?>
+<?php $result = $this->Department_model->ajax_company_employee_info($company_id, $location);?>
 <div class="form-group">
    <label for="employee"><?php echo $this->lang->line('xin_employee');?></label>
    <select name="employee_id" id="employee_id" class="form-control" data-plugin="select_hrm" data-placeholder="<?php echo $this->lang->line('xin_choose_an_employee');?>" required>

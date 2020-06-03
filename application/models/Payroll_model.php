@@ -131,78 +131,173 @@
 	}
 	
 	// get payslips of single employee
-	public function get_payroll_slip($id) {
+	public function get_payroll_slip($id, $fechaInicial = null, $fechaFinal = null) {
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE employee_id = ? and status = ?';
-		$binds = array($id,2);
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where  employee_id = ? and status = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $id,2, $fechaInicial, $fechaFinal );
+			$query = $this->db->query($sql, $binds);
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE employee_id = ? and status = ?';
+			$binds = array($id,2);
+		}
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
-	public function get_company_payslips($id) {
-		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and status = ?';
-		$binds = array($id,2);
+	public function get_company_payslips($id, $fechaInicial = null, $fechaFinal = null) {
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where  company_id = ? and status = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $id,2, $fechaInicial, $fechaFinal );
+			$query = $this->db->query($sql, $binds);
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and status = ?';
+			$binds = array($id,2);
+		}
+
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// new payroll > payslip
-	public function all_employees_payment_history() {
-	  	$sql = 'SELECT * FROM xin_salary_payslips';
-		$query = $this->db->query($sql);
+	public function all_employees_payment_history( $fechaInicial = null, $fechaFinal = null ){
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $fechaInicial, $fechaFinal );
+			$query = $this->db->query($sql, $binds);
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips';
+			$query = $this->db->query($sql);
+		}
+	  	
 		return $query;
 	}
 	// new payroll > payslip
-	public function all_employees_payment_history_month($salary_month) {
-	  	$sql = 'SELECT * FROM xin_salary_payslips WHERE salary_month = ?';
-		$binds = array($salary_month);
+	public function all_employees_payment_history_month($salary_month, $fechaInicial = null, $fechaFinal = null ) {
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where salary_month = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $salary_month, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE salary_month = ?';
+			$binds = array($salary_month);
+		}
+	  	
+		$query = $this->db->query($sql, $binds);
+		return $query;
+	}
+
+	// get payslip history > company
+	public function get_company_payslip_history($company_id, $fechaInicial = null, $fechaFinal = null ) {
+		
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where company_id = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ?';
+			$binds = array( $company_id, $fechaInicial, $fechaFinal );
+		}
+		
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// get payslip history > company
-	public function get_company_payslip_history($company_id) {
+	public function get_company_payslip_history_month($company_id,$salary_month, $fechaInicial = null, $fechaFinal = null ) {
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ?';
-		$binds = array($company_id,$salary_month);
-		$query = $this->db->query($sql, $binds);
-		return $query;
-	}
-	// get payslip history > company
-	public function get_company_payslip_history_month($company_id,$salary_month) {
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where company_id = ? and salary_month = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id,$salary_month, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and salary_month = ?';
+			$binds = array($company_id,$salary_month);
+		}
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and salary_month = ?';
-		$binds = array($company_id,$salary_month);
-		$query = $this->db->query($sql, $binds);
-		return $query;
-	}
-	// get company/location payslips
-	public function get_company_location_payslips($company_id,$location_id) {
-		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ?';
-		$binds = array($company_id,$location_id,$salary_month);
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// get company/location payslips
-	public function get_company_location_payslips_month($company_id,$location_id,$salary_month) {
+	public function get_company_location_payslips($company_id,$location_id, $fechaInicial = null, $fechaFinal = null ) {
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where company_id = ? and location_id = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id,$location_id,$salary_month, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ?';
+			$binds = array($company_id,$location_id,$salary_month);
+		}
+
+		$query = $this->db->query($sql, $binds);
+		return $query;
+	}
+	// get company/location payslips
+	public function get_company_location_payslips_month($company_id,$location_id,$salary_month, $fechaInicial = null, $fechaFinal = null ) {
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and salary_month = ?';
-		$binds = array($company_id,$location_id,$salary_month);
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where company_id = ? and location_id = ? and salary_month = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id,$location_id,$salary_month, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and salary_month = ?';
+			$binds = array($company_id,$location_id,$salary_month);
+		}
+
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// get company/location/departments payslips
-	public function get_company_location_department_payslips($company_id,$location_id,$department_id) {
+	public function get_company_location_department_payslips($company_id,$location_id,$department_id, $fechaInicial = null, $fechaFinal = null ) {
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where  company_id = ? and location_id = ? and department_id = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id,$location_id,$department_id, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and department_id = ?';
+			$binds = array($company_id,$location_id,$department_id);
+		}		
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and department_id = ?';
-		$binds = array($company_id,$location_id,$department_id);
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// get company/location/departments payslips
-	public function get_company_location_department_payslips_month($company_id,$location_id,$department_id,$salary_month) {
+	public function get_company_location_department_payslips_month($company_id,$location_id,$department_id,$salary_month, $fechaInicial = null, $fechaFinal = null ) {
+
+		if( !empty( $fechaInicial ) && !empty( $fechaFinal ) ){
+
+			$sql = 'SELECT * FROM xin_salary_payslips where company_id = ? and location_id = ? and department_id = ? and salary_month = ? and fecha_inicial >= ? and fecha_final <= ?';
+			$binds = array( $company_id,$location_id,$department_id,$salary_month, $fechaInicial, $fechaFinal );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and department_id = ? and salary_month = ?';
+			$binds = array($company_id,$location_id,$department_id,$salary_month);
+		}		
 		
-		$sql = 'SELECT * FROM xin_salary_payslips WHERE company_id = ? and location_id = ? and department_id = ? and salary_month = ?';
-		$binds = array($company_id,$location_id,$department_id,$salary_month);
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
