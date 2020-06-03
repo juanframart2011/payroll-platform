@@ -7,6 +7,7 @@ $user_info = $this->Xin_model->read_user_info($session['user_id']);
 //material-design
 $theme = $this->Xin_model->read_theme_info(1);
 // set layout / fixed or static
+
 if($user_info[0]->fixed_header=='fixed_layout_hrsale') {
 	$fixed_header = 'fixed';
 }
@@ -25,12 +26,6 @@ if($user_info[0]->compact_sidebar=='sidebar_layout_hrsale') {
 else {
 	$compact_sidebar = '';
 }
-/*
-if($this->router->fetch_class() =='chat'){
-	$chat_app = 'chat-application';
-} else {
-	$chat_app = '';
-}*/
 $role_user = $this->Xin_model->read_user_role_info($user_info[0]->user_role_id);
 if(!is_null($role_user)){
 	$role_resources_ids = explode(',',$role_user[0]->role_resources);

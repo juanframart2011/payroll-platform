@@ -102,29 +102,38 @@ class Payroll extends MY_Controller {
 	}
 	 	 
 	 // payment history
-	 public function payment_history()
-     {
+	public function payment_history()
+	{
 		$session = $this->session->userdata('username');
 		if(empty($session)){ 
+		
 			redirect('admin/');
 		}
+
 		$data['title'] = $this->lang->line('xin_payroll_history_title');
 		$data['all_employees'] = $this->Xin_model->all_employees();
 		$data['breadcrumbs'] = $this->lang->line('left_payment_history');
 		$data['path_url'] = 'payment_history';
 		$data['get_all_companies'] = $this->Xin_model->get_companies();
 		$role_resources_ids = $this->Xin_model->user_role_resource();
-		if(in_array('37',$role_resources_ids)) {
-			if(!empty($session)){
+
+		if( in_array( '37', $role_resources_ids ) ){
+
+			if( !empty( $session ) ){
+				
 				$data['subview'] = $this->load->view("admin/payroll/payment_history", $data, TRUE);
 				$this->load->view('admin/layout/layout_main', $data); //page load
-			} else {
+			}
+			else{
+			
 				redirect('admin/');
 			}
-		} else {
+		}
+		else {
+			
 			redirect('admin/dashboard');
 		}		  
-     }
+	}
 	 	 
 	 // payslip > employees
 	 public function payslip_list() {
@@ -1789,64 +1798,74 @@ class Payroll extends MY_Controller {
 			$user = $this->Xin_model->read_user_info($r->employee_id);
 			// user full name
 			if(!is_null($user)){
-			$full_name = $user[0]->first_name.' '.$user[0]->last_name;
-			$emp_link = $user[0]->employee_id;			  		  
-			$month_payment = date("F, Y", strtotime($r->salary_month));
+				$full_name = $user[0]->first_name.' '.$user[0]->last_name;
+				$emp_link = $user[0]->employee_id;			  		  
+				$month_payment = date("F, Y", strtotime($r->salary_month));
 
-			$fecha_inicialR = $r->fecha_inicial;
-			$fecha_finalR = $r->fecha_final;
-			
-			$p_amount = $this->Xin_model->currency_sign($r->net_salary);
-			
-			// get date > created at > and format
-			$created_at = $this->Xin_model->set_date_format($r->created_at);
-			// get designation
-			$designation = $this->Designation_model->read_designation_information($user[0]->designation_id);
-			if(!is_null($designation)){
-				$designation_name = $designation[0]->designation_name;
-			} else {
-				$designation_name = '--';	
-			}
-			// department
-			$department = $this->Department_model->read_department_information($user[0]->department_id);
-			if(!is_null($department)){
-			$department_name = $department[0]->department_name;
-			} else {
-			$department_name = '--';	
-			}
-			$department_designation = $designation_name.' ('.$department_name.')';
-			// get company
-			$company = $this->Xin_model->read_company_info($user[0]->company_id);
-			if(!is_null($company)){
-				$comp_name = $company[0]->name;
-			} else {
-				$comp_name = '--';	
-			}
-			// bank account
-			$bank_account = $this->Employees_model->get_employee_bank_account_last($user[0]->user_id);
-			if(!is_null($bank_account)){
-				$account_number = $bank_account[0]->account_number;
-			} else {
-				$account_number = '--';	
-			}
-			//<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_view').'"><a href="'.site_url().'admin/payroll/payslip/id/'.$r->payslip_key.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-arrow-circle-right"></span></button></a></span>
-			$diasTrabajados = $this->Employees_model->get_dias_trabajados( $r->employee_id, $fecha_inicialR, $fecha_finalR);
-			$payslip = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$r->payslip_key.'?fecha_inicial='.$fecha_inicialR.'&fecha_final='.$fecha_finalR.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
-			
-			$ifull_name = nl2br ($full_name."\r\n <small class='text-muted'><i>".$this->lang->line('xin_employees_id').': '.$emp_link."<i></i></i></small>\r\n <small class='text-muted'><i>".$department_designation.'<i></i></i></small>');
-               $data[] = array(
+				$fecha_inicialR = $r->fecha_inicial;
+				$fecha_finalR = $r->fecha_final;
+				
+				$p_amount = $this->Xin_model->currency_sign($r->net_salary);
+				
+				// get date > created at > and format
+				$created_at = $this->Xin_model->set_date_format($r->created_at);
+				// get designation
+				$designation = $this->Designation_model->read_designation_information($user[0]->designation_id);
+				if(!is_null($designation)){
+					$designation_name = $designation[0]->designation_name;
+				} else {
+					$designation_name = '--';	
+				}
+				// department
+				$department = $this->Department_model->read_department_information($user[0]->department_id);
+				if(!is_null($department)){
+				$department_name = $department[0]->department_name;
+				} else {
+				$department_name = '--';	
+				}
+				$department_designation = $designation_name.' ('.$department_name.')';
+				// get company
+				$company = $this->Xin_model->read_company_info($user[0]->company_id);
+				if(!is_null($company)){
+					$comp_name = $company[0]->name;
+				} else {
+					$comp_name = '--';	
+				}
+				// bank account
+				$bank_account = $this->Employees_model->get_employee_bank_account_last($user[0]->user_id);
+				if(!is_null($bank_account)){
+					$account_number = $bank_account[0]->account_number;
+				}
+				else {
+					$account_number = '--';	
+				}
+
+				$diasTrabajados = $this->Employees_model->get_dias_trabajados( $r->employee_id, $fecha_inicialR, $fecha_finalR);
+				$payslip = '<span data-toggle="tooltip" data-placement="top" title="'.$this->lang->line('xin_download').'"><a href="'.site_url().'admin/payroll/pdf_create/p/'.$r->payslip_key.'?fecha_inicial='.$fecha_inicialR.'&fecha_final='.$fecha_finalR.'"><button type="button" class="btn icon-btn btn-xs btn-default waves-effect waves-light"><span class="fa fa-download"></span></button></a></span>';
+				
+				$ifull_name = nl2br ($full_name."\r\n <small class='text-muted'><i>".$this->lang->line('xin_employees_id').': '.$emp_link."<i></i></i></small>\r\n <small class='text-muted'><i>".$department_designation.'<i></i></i></small>');
+
+				$pagoBruto = $r->basic_salary * $r->hours_worked;
+				$pagoBruto = '$' . number_format( $pagoBruto, 2, '.', ',' );
+
+            	$data[] = array(
 					$payslip,
                     $full_name,
 					$comp_name,
-					$account_number,
+					$pagoBruto,
+					$r->total_other_payments,
+					$r->total_statutory_deductions,
+					$r->total_overtime,
+					$r->total_loan,
+					$r->total_commissions,
+					$r->total_allowances,
                     $p_amount,
-                    //$month_payment,
                     $diasTrabajados,
                     $fecha_inicialR,
                     $fecha_finalR,
                     $created_at,
-               );
-          }
+				);
+          	}
 		  } // if employee available
 
           $output = array(
@@ -1866,7 +1885,7 @@ class Payroll extends MY_Controller {
 		if(empty($session)){ 
 			redirect('admin/');
 		}
-		//$data['title'] = $this->Xin_model->site_title();
+
 		$key = $this->uri->segment(5);
 		
 		$result = $this->Payroll_model->read_salary_payslip_info_key($key);
@@ -1874,12 +1893,7 @@ class Payroll extends MY_Controller {
 			redirect('admin/payroll/generate_payslip');
 		}
 		$p_method = '';
-		/*$payment_method = $this->Xin_model->read_payment_method($result[0]->payment_method);
-		if(!is_null($payment_method)){
-		  $p_method = $payment_method[0]->method_name;
-		} else {
-		  $p_method = '--';
-		}*/
+
 		// get addd by > template
 		$user = $this->Xin_model->read_user_info($result[0]->employee_id);
 		// user full name

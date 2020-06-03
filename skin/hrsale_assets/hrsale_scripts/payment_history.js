@@ -9,17 +9,17 @@ var xin_table = $('#xin_table').dataTable({
 		"buttons": [{
 			extend: 'csv',
 			exportOptions: {
-				columns: [ 1, 2, 3, 4, 5,6]
+				columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
 			}
 		}, {
 			extend: 'excel',
 			exportOptions: {
-				columns: [ 1, 2, 3, 4, 5,6]
+				columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
 			}
 		}, {
 			extend: 'pdfHtml5',
 			exportOptions: {
-				columns: [ 1, 2, 3, 4, 5,6]
+				columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
 			}
 		},], // colvis > if needed
 	"fnDrawCallback": function(settings){
@@ -50,17 +50,17 @@ $("#ihr_report").submit(function(e){
 			"buttons": [{
                 extend: 'csv',
                 exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6]
+                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
                 }
             }, {
                 extend: 'excel',
                 exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6]
+                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
                 }
             }, {
                 extend: 'pdfHtml5',
                 exportOptions: {
-                    columns: [ 1, 2, 3, 4, 5,6]
+                    columns: [ 1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14]
                 }
             },], // colvis > if needed
 			"fnDrawCallback": function(settings){

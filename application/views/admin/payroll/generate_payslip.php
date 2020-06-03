@@ -57,7 +57,17 @@ if($system[0]->is_half_monthly==1){
                 </div>
                 <?php } ?>
               </div>
-              <div class="col-md-3">
+
+            <div class="col-md-2">
+                <div class="form-group" id="location_ajax">
+                <label for="name"><?php echo $this->lang->line('left_location');?></label>
+                <select disabled="disabled" name="location_id" id="location_id" class="form-control" data-plugin="select_hrm" data-placeholder="<?php echo $this->lang->line('left_location');?>">
+                <option value=""></option>
+                </select>
+                </div>
+            </div>
+
+              <div class="col-md-2">
                 <div class="form-group" id="employee_ajax">
                   <label for="department"><?php echo $this->lang->line('dashboard_single_employee');?></label>
                   <select id="employee_id" name="employee_id" class="form-control" data-plugin="select_hrm" data-placeholder="<?php echo $this->lang->line('xin_choose_an_employee');?>">
@@ -68,12 +78,6 @@ if($system[0]->is_half_monthly==1){
               <?php } else {?>
               <input type="hidden" name="employee_id" id="employee_id" value="<?php echo $session['user_id'];?>" />
               <?php } ?>
-              <!--<div class="col-md-2">
-                <div class="form-group">
-                  <label for="month_year"><?php echo $this->lang->line('xin_select_month');?></label>
-                  <input class="form-control month_year" placeholder="<?php echo $this->lang->line('xin_select_month');?>" readonly id="month_year" name="month_year" type="text" value="<?php echo date('Y-m');?>">
-                </div>
-              </div>-->
               <div class="col-md-2">
                 <div class="form-group">
                   <label for="fecha_inicial">Fecha Inicial</label>
