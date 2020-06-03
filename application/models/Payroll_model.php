@@ -15,26 +15,53 @@
 	}
 	
 	// get payroll templates > for companies
-	public function get_comp_template($cid,$id) {
+	public function get_comp_template($cid,$id, $location = null ) {
+
+		if( !empty( $location ) ){
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!=? and location_id = ?';
+			$binds = array( $cid, 1, $location );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!=?';
+			$binds = array($cid,1);
+		}		
 		
-		$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_role_id!=?';
-		$binds = array($cid,1);
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 	// get payroll templates > employee/company
-	public function get_employee_comp_template($cid,$id) {
+	public function get_employee_comp_template($cid,$id, $location = null ) {
+
+		if( !empty( $location ) ){
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_id = ? and location_id = ?';
+			$binds = array($cid,$id, $location);
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_id = ?';
+			$binds = array($cid,$id);
+		}		
 		
-		$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and user_id = ?';
-		$binds = array($cid,$id);
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}
 
-	public function get_employee_comp_template_all($cid) {
+	public function get_employee_comp_template_all($cid, $location = null ) {
+
+		if( !empty( $location ) ){
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ? and location_id = ?';
+			$binds = array($cid,$id, $location);
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_employees WHERE company_id = ?';
+			$binds = array( $cid );
+		}		
 		
-		$sql = 'SELECT * FROM xin_employees WHERE company_id = ?';
-		$binds = array( $cid );
 		$query = $this->db->query($sql, $binds);
 		return $query;
 	}

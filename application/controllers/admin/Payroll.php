@@ -135,14 +135,18 @@ class Payroll extends MY_Controller {
 		}		  
 	}
 	 	 
-	 // payslip > employees
-	 public function payslip_list() {
+	// payslip > employees
+	public function payslip_list() {
 
 		$data['title'] = $this->Xin_model->site_title();
 		$session = $this->session->userdata('username');
-		if(!empty($session)){ 
-			$this->load->view("admin/payroll/generate_payslip", $data);
-		} else {
+		
+		if( !empty( $session ) ){ 
+			
+			$this->load->view( "admin/payroll/generate_payslip", $data );
+		}
+		else{
+			
 			redirect('admin/');
 		}
 		// Datatables Variables
@@ -152,6 +156,7 @@ class Payroll extends MY_Controller {
 
 		$p_fecha_inicial= $this->input->get("fecha_inicial");
 		$p_fecha_final= $this->input->get("fecha_final");
+		$location = $this->input->get( "location" );
 
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$user_info = $this->Xin_model->read_user_info($session['user_id']);
@@ -160,29 +165,35 @@ class Payroll extends MY_Controller {
 		if( !empty( $this->input->get( "employee_id" ) ) ){
 
 			$empleadoId = $this->input->get( "employee_id" );
-		}		
-
-		//$diasTrabajados2 = $this->Employees_model->get_dias_trabajados( $empleadoId, $p_fecha_inicial, $p_fecha_final);
+		}
 		
 		if($user_info[0]->user_role_id==1 || in_array('314',$role_resources_ids)){
+			
 			if($this->input->get("employee_id")==0 && $this->input->get("company_id")==0) {
-				$payslip = $this->Employees_model->get_employees_payslip();
-			} else if($this->input->get("employee_id")==0 && $this->input->get("company_id")!=0) {
-				$payslip = $this->Payroll_model->get_comp_template($this->input->get("company_id"),0);
-			} else if($this->input->get("employee_id")!=0 && $this->input->get("company_id")!=0) {
-				$payslip = $this->Payroll_model->get_employee_comp_template($this->input->get("company_id"),$this->input->get("employee_id"));
-			} else {
-				$payslip = $this->Employees_model->get_employees_payslip();
+
+				$payslip = $this->Employees_model->get_employees_payslip( $location );
+			}
+			else if($this->input->get("employee_id")==0 && $this->input->get("company_id")!=0) {
+
+				$payslip = $this->Payroll_model->get_comp_template( $this->input->get("company_id"), 0, $location );
+			}
+			else if($this->input->get("employee_id")!=0 && $this->input->get("company_id")!=0) {
+
+				$payslip = $this->Payroll_model->get_employee_comp_template( $this->input->get("company_id"), $this->input->get("employee_id"), $location );
+			}
+			else {
+				$payslip = $this->Employees_model->get_employees_payslip( $location );
 			}
 		}
-		else {
+		else{
+
 			if( $empleadoId == 0 ){
 
-				$payslip = $this->Payroll_model->get_employee_comp_template_all($user_info[0]->company_id);
+				$payslip = $this->Payroll_model->get_employee_comp_template_all($user_info[0]->company_id, $location);
 			}
 			else{
 
-				$payslip = $this->Payroll_model->get_employee_comp_template($user_info[0]->company_id,$session['user_id']);
+				$payslip = $this->Payroll_model->get_employee_comp_template( $user_info[0]->company_id, $session['user_id'], $location);
 			}
 		}
 		$system = $this->Xin_model->read_setting_info(1);		

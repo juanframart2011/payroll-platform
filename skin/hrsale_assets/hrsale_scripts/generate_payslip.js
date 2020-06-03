@@ -1,19 +1,22 @@
 $(document).ready(function() {
-var employee_id = jQuery('#employee_id').val();
-var month_year = jQuery('#month_year').val();
-var company_id = jQuery('#aj_company').val();
-var fecha_inicial = jQuery('#fecha_inicial').val();
-var fecha_final = jQuery('#fecha_final').val();
-var xin_table = $('#xin_table').dataTable({
-"bDestroy": true,
-"ajax": {
-	url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
-	type : 'GET'
-},
-"fnDrawCallback": function(settings){
-$('[data-toggle="tooltip"]').tooltip();          
-}
-});
+
+	var employee_id = jQuery('#employee_id').val();
+	var month_year = jQuery('#month_year').val();
+	var company_id = jQuery('#aj_company').val();
+	var fecha_inicial = jQuery('#fecha_inicial').val();
+	var fecha_final = jQuery('#fecha_final').val();
+	var location = jQuery( "select[name='location_id']" ).val();
+	
+	var xin_table = $('#xin_table').dataTable({
+		"bDestroy": true,
+		"ajax": {
+			url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&location="+location+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
+			type : 'GET'
+		},
+		"fnDrawCallback": function(settings){
+			$('[data-toggle="tooltip"]').tooltip();          
+		}
+	});
 
 $('[data-plugin="select_hrm"]').select2($(this).attr('data-options'));
 $('[data-plugin="select_hrm"]').select2({ width:'100%' }); 
@@ -116,22 +119,6 @@ $.ajax({
 });
 });
 
-/*$('.view-modal-data').on('show.bs.modal', function (event) {
-var button = $(event.relatedTarget);
-var pay_id = button.data('pay_id');
-var modal = $(this);
-$.ajax({
-	url: site_url+'payroll/payroll_template_approve/',
-	type: "GET",
-	data: 'jd=1&is_ajax=11&mode=not_paid&data=payroll_approve&type=payroll_approve&pay_id='+pay_id,
-	success: function (response) {
-		if(response) {
-			$("#ajax_modal").html(response);
-		}
-	}
-});
-});*/
-
 // detail modal data  hourlywages
 $('.hourlywages_template_modal').on('show.bs.modal', function (event) {
 var button = $(event.relatedTarget);
@@ -223,7 +210,9 @@ var employee_id = jQuery('#employee_id').val();
 var bmonth_year = jQuery('#bmonth_year').val();
 var fecha_inicial = jQuery('#fecha_inicial').val();
 var fecha_final = jQuery('#fecha_final').val();
-var company_id = jQuery('#aj_company').val()
+var company_id = jQuery('#aj_company').val();
+var location = jQuery( "select[name='location_id']" ).val();
+
 $.ajax({
 	type: "POST",
 	url: e.target.action,
@@ -238,7 +227,7 @@ $.ajax({
 			var xin_table3 = $('#xin_table').dataTable({
 				"bDestroy": true,
 				"ajax": {
-					url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
+					url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&location="+location+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
 					type : 'GET'
 				},
 				"fnDrawCallback": function(settings){
@@ -281,33 +270,44 @@ $.ajax({
 });
 });
 
-/* Set Salary Details*/
-$("#set_salary_details").submit(function(e){
-/*Form Submit*/
-e.preventDefault();
-var obj = $(this), action = obj.attr('name');
-var employee_id = jQuery('#employee_id').val();
-var month_year = jQuery('#month_year').val();
-var fecha_inicial = jQuery('#fecha_inicial').val();
-var fecha_final = jQuery('#fecha_final').val();
-var company_id = jQuery('#aj_company').val();
-// On page load: datatable
-$('#p_month').html(month_year);
-var xin_table2 = $('#xin_table').dataTable({
-	"bDestroy": true,
-	"ajax": {
-		url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
-		type : 'GET'
-	},
-	"fnDrawCallback": function(settings){
-	$('[data-toggle="tooltip"]').tooltip();          
-	}
+	/* Set Salary Details*/
+	$("#set_salary_details").submit(function(e){
+		/*Form Submit*/
+		e.preventDefault();
+		var obj = $(this), action = obj.attr('name');
+		var employee_id = jQuery('#employee_id').val();
+		var month_year = jQuery('#month_year').val();
+		var fecha_inicial = jQuery('#fecha_inicial').val();
+		var fecha_final = jQuery('#fecha_final').val();
+		var company_id = jQuery('#aj_company').val();
+		var location = jQuery( "select[name='location_id']" ).val();
+		// On page load: datatable
+		$('#p_month').html(month_year);
+		var xin_table2 = $('#xin_table').dataTable({
+			"bDestroy": true,
+			"ajax": {
+				url : site_url+"payroll/payslip_list/?employee_id="+employee_id+"&location="+location+"&company_id="+company_id+"&fecha_inicial="+fecha_inicial+"&fecha_final="+fecha_final,
+				type : 'GET'
+			},
+			"fnDrawCallback": function(settings){
+			$('[data-toggle="tooltip"]').tooltip();          
+			}
+		});
+		
+		xin_table2.api().ajax.reload(function(){ 
+		}, true);
+	});
 });
-xin_table2.api().ajax.reload(function(){ 
-}, true);
-});
-});
+
+
 $( document ).on( "click", ".delete", function() {
 $('input[name=_token]').val($(this).data('record-id'));
 $('#delete_record').attr('action',base_url+'/payslip_delete/'+$(this).data('record-id'))+'/';
+});
+
+jQuery("#aj_company").change(function(){
+
+	jQuery.get(escapeHtmlSecure(site_url+"department/get_company_locations/"+jQuery(this).val()), function(data, status){
+		jQuery('#location_ajax').html(data);
+	});
 });

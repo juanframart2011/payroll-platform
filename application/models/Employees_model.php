@@ -62,10 +62,20 @@ class Employees_model extends CI_Model {
 	    return $query;
 	}
 	// get all employes >
-	public function get_employees_payslip() {
+	public function get_employees_payslip( $location = null ) {
 		
-		$sql = 'SELECT * FROM xin_employees WHERE user_role_id != ?';
-		$binds = array(1);
+		if( !empty( $location ) ){
+
+			$sql = 'SELECT * FROM xin_employees WHERE user_role_id != ? and location_id = ?';
+			$binds = array(1, $location );
+		}
+		else{
+
+			$sql = 'SELECT * FROM xin_employees WHERE user_role_id != ?';
+			$binds = array(1);
+		}
+		
+		
 		$query = $this->db->query($sql, $binds);
 	    return $query;
 	}
