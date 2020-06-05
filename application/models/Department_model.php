@@ -70,9 +70,22 @@
 	
 	// get single record > company | locations
 	 public function ajax_company_location_information($id) {
-	
-		$sql = 'SELECT * FROM xin_office_location WHERE company_id = ?';
-		$binds = array($id);
+		
+		$this->load->model( 'Xin_model' );
+
+		$session = $this->session->userdata( 'username' );
+		$user_info = $this->Xin_model->read_user_info( $session['user_id'] );
+		if( $user_info[0]->user_role_id == 1 || $user_info[0]->user_role_id == 3 ){
+			
+			$sql = 'SELECT * FROM xin_office_location WHERE company_id = ?';
+			$binds = array($id);
+		}
+		else {
+
+			$sql = 'SELECT * FROM xin_office_location WHERE company_id = ? and location_id = ?';
+			$binds = array( $id, $user_info[0]->location_id );
+		}
+		
 		$query = $this->db->query($sql, $binds);
 		
 		if ($query->num_rows() > 0) {

@@ -30,7 +30,7 @@ jQuery( document ).on( "change", ".form-control[name='location_id']", function( 
 	var location = jQuery( "select[name='location_id']" ).val();
 	console.log( "location => ", location );
 
-	jQuery.get(base_url+"/get_update_employees?company="+jQuery(this).val()+"&location="+location, function(data, status){
+	jQuery.get(base_url+"/get_update_employees?company="+jQuery("#aj_company").val()+"&location="+location, function(data, status){
 		jQuery('#employee_ajax').html(data);
 	});
 });

@@ -1772,43 +1772,45 @@ class Payroll extends MY_Controller {
 				
 				if($this->input->get("salary_month") == ''){
 					
+					$optionQuery = "A";
 					$history = $this->Payroll_model->all_employees_payment_history( $fechaInicial, $fechaFinal );
 				}
 				else {
-					
+					$optionQuery = "b";
 					$history = $this->Payroll_model->all_employees_payment_history_month( $this->input->get("salary_month"), $fechaInicial, $fechaFinal );
 				}
 			}
 			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")==0 && $this->input->get("department_id")==0){
 				
 				if($this->input->get("salary_month") == ''){
-					
+					$optionQuery = "C";
 					$history = $this->Payroll_model->get_company_payslip_history($this->input->get("company_id"), $fechaInicial, $fechaFinal );
 				}
 				else {
-					
+					$optionQuery = "D";
 					$history = $this->Payroll_model->get_company_payslip_history_month($this->input->get("company_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
 				}
 			}
 			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")==0 ){
 				
 				if($this->input->get("salary_month") == ''){
-					
+					$optionQuery = "E";
 					$history = $this->Payroll_model->get_company_location_payslips($this->input->get("company_id"),$this->input->get("location_id"), $fechaInicial, $fechaFinal );
 				}
 				else {
-					
+					$optionQuery = "F";
 					$history = $this->Payroll_model->get_company_location_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
 				}
 			}
 			else if($this->input->get("company_id")!=0 && $this->input->get("location_id")!=0 && $this->input->get("department_id")!=0){
 				
 				if($this->input->get("salary_month") == ''){
-					
+					$optionQuery = "G";
 					$history = $this->Payroll_model->get_company_location_department_payslips($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"), $fechaInicial, $fechaFinal );
 				}
 				else {
-					
+					$optionQuery = "H";
+
 					$history = $this->Payroll_model->get_company_location_department_payslips_month($this->input->get("company_id"),$this->input->get("location_id"),$this->input->get("department_id"),$this->input->get("salary_month"), $fechaInicial, $fechaFinal );
 				}
 			}
@@ -1816,22 +1818,24 @@ class Payroll extends MY_Controller {
 		else {
 
 			if($user_info[0]->user_role_id==1 || $user_info[0]->user_role_id==3){
-				
+				$optionQuery = "I";
 				$history = $this->Payroll_model->employees_payment_history( $fechaInicial, $fechaFinal );
 			}
 			else {
 				if(in_array('391',$role_resources_ids)) {
-				
+					$optionQuery = "J";
 					$history = $this->Payroll_model->get_company_payslips($user_info[0]->company_id, $fechaInicial, $fechaFinal );
 				}
 				else {
-					
+					$optionQuery = "K";
+
 					$history = $this->Payroll_model->get_payroll_slip($session['user_id'], $fechaInicial, $fechaFinal );
 				}
 			}
 		}
 
 		$data = array();
+		$p_amount = 0;
 
 		foreach($history->result() as $r) {
 
@@ -1907,17 +1911,18 @@ class Payroll extends MY_Controller {
                     $created_at,
 				);
           	}
-		  } // if employee available
+		} // if employee available
 
-          $output = array(
-               "draw" => $draw,
-                 "recordsTotal" => $history->num_rows(),
-                 "recordsFiltered" => $history->num_rows(),
-                 "data" => $data,
-                 "p_amount" => $p_amount
-            );
-          echo json_encode($output);
-          exit();
+		$output = array(
+			"draw" => $draw,
+			"recordsTotal" => $history->num_rows(),
+			"recordsFiltered" => $history->num_rows(),
+			"data" => $data,
+			"p_amount" => $p_amount,
+			"options" => $optionQuery
+		);
+		echo json_encode($output);
+		exit();
      }
 	
 	// payment history
@@ -2444,8 +2449,8 @@ class Payroll extends MY_Controller {
 		$pdf->Ln(7);
 		$tblbrk = '<table cellpadding="3" cellspacing="0" border="1"><tr bgcolor="#gray">
 				<td colspan="2" align="center"><strong>'.$this->lang->line('xin_description').'</strong></td>
-				<td align="center"><strong>'.$this->lang->line('xin_payslip_earning').'</strong></td>	
-				<td align="center"><strong>'.$this->lang->line('xin_deductions').'</strong></td>			
+				<td align="center"><strong>Percepciones</strong></td>	
+				<td align="center"><strong>Deducciones</strong></td>			
 			</tr>';
 			if($payment[0]->payslip_type!='hourly'){
 				$tblbrk .= '<tr>

@@ -119,11 +119,11 @@ $user_info = $this->Xin_model->read_user_info($session['user_id']);?>
         </div>
     </div>
 
-    <div class="row">
+    <!--<div class="row">
         <div class="col-md-4">
             <h4>Pago Neto Total <b id="totalAmountNomina"></b></h4>
         </div>
-    </div>
+    </div>-->
 </div>
 <style type="text/css">
 .hide-calendar .ui-datepicker-calendar { display:none !important; }
