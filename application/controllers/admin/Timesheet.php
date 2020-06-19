@@ -2590,7 +2590,8 @@ class Timesheet extends MY_Controller {
 		$role_resources_ids = $this->Xin_model->user_role_resource();
 		$user_info = $this->Xin_model->read_user_info($session['user_id']);
 
-		if($user_info[0]->user_role_id==1){
+		$office_shift = $this->Timesheet_model->get_office_shifts();
+		/*if($user_info[0]->user_role_id==1){
 
 			$office_shift = $this->Timesheet_model->get_office_shifts();
 		}
@@ -2601,7 +2602,7 @@ class Timesheet extends MY_Controller {
 			} else {
 				$office_shift = $this->Xin_model->get_employee_shift_office($user_info[0]->office_shift_id);
 			}
-		}
+		}*/
 
 		foreach( $office_shift->result() as $r ){
 			  
@@ -2617,6 +2618,7 @@ class Timesheet extends MY_Controller {
 				'employee_id' => $employee_id,
 				'turno' => $turnoData
 				);
+
 		if(!empty($session)){ 
 			$this->load->view('admin/timesheet/dialog_attendance', $data);
 		} else {
